@@ -42,7 +42,7 @@ export function TeacherPage() {
   });
 
   if (isLoading) {
-    return <p className="text-slate-500">Загрузка профиля...</p>;
+    return <p className="text-slate-400">Загрузка профиля...</p>;
   }
 
   const directoryMode = getDirectoryMode(activePanel);
@@ -100,11 +100,11 @@ export function TeacherPage() {
 
   return (
     <div className="w-full max-w-none min-w-0 space-y-6">
-      <section className="w-full max-w-none min-w-0 rounded-3xl border border-slate-200 bg-white p-8" shadow-sm>
+      <section className="w-full max-w-none min-w-0 rounded-3xl border border-slate-800 bg-slate-900/70 p-8">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Главная панель преподавателя</h1>
-            <p className="mt-2 max-w-4xl text-slate-500">
+            <h1 className="text-3xl font-bold text-white">Главная панель преподавателя</h1>
+            <p className="mt-2 max-w-4xl text-slate-400">
               Здесь собраны все основные разделы для работы преподавателя: просмотр профиля,
               расписание, выставление оценок, работа с успеваемостью, просмотр студентов,
               аналитика по группам и экспорт отчетов.
@@ -113,7 +113,7 @@ export function TeacherPage() {
 
           <button
             onClick={() => setActivePanel('home')}
-            className="rounded-2xl border border-slate-300 bg-white px-4 py-3 font-medium text-slate-700 hover:bg-slate-100"
+            className="rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 font-medium text-slate-200 hover:bg-slate-800"
           >
             На главную панель
           </button>
@@ -127,7 +127,7 @@ export function TeacherPage() {
               className={`rounded-2xl px-5 py-4 text-left transition ${
                 activePanel === button.key
                   ? 'bg-blue-500 text-white'
-                  : 'bg-white text-slate-700 hover:bg-slate-100'
+                  : 'bg-slate-950 text-slate-200 hover:bg-slate-800'
               }`}
             >
               <div className="text-sm opacity-80">{button.subtitle}</div>
@@ -138,9 +138,9 @@ export function TeacherPage() {
       </section>
 
       {activePanel === 'home' && (
-        <section className="w-full max-w-none min-w-0 rounded-3xl border border-slate-200 bg-white p-6 text-slate-700" shadow-sm>
-          <h2 className="text-2xl font-semibold text-slate-900">Рабочее пространство преподавателя</h2>
-          <p className="mt-2 text-slate-500">
+        <section className="w-full max-w-none min-w-0 rounded-3xl border border-slate-800 bg-slate-900/70 p-6 text-slate-300">
+          <h2 className="text-2xl font-semibold text-white">Рабочее пространство преподавателя</h2>
+          <p className="mt-2 text-slate-400">
             Выберите нужный раздел с помощью кнопок выше. Преподаватель может просматривать
             расписание, выставлять оценки и посещаемость, анализировать результаты студентов,
             сравнивать группы и формировать Excel-отчеты.
@@ -150,9 +150,9 @@ export function TeacherPage() {
 
       {activePanel === 'profile' && (
         <section className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-3xl border border-slate-200 bg-white p-6" shadow-sm>
-            <h2 className="mb-4 text-xl font-semibold text-slate-900">Основная информация</h2>
-            <div className="space-y-3 text-slate-700">
+          <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
+            <h2 className="mb-4 text-xl font-semibold text-white">Основная информация</h2>
+            <div className="space-y-3 text-slate-300">
               <p>
                 <span className="text-slate-500">ФИО:</span> {data?.fullName}
               </p>
@@ -168,9 +168,9 @@ export function TeacherPage() {
             </div>
           </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-6" shadow-sm>
-            <h2 className="mb-4 text-xl font-semibold text-slate-900">Информация преподавателя</h2>
-            <div className="space-y-3 text-slate-700">
+          <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
+            <h2 className="mb-4 text-xl font-semibold text-white">Информация преподавателя</h2>
+            <div className="space-y-3 text-slate-300">
               <p>
                 <span className="text-slate-500">Кафедра:</span>{' '}
                 {data?.teacher?.departmentName || '—'}

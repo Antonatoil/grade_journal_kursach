@@ -31,23 +31,23 @@ export function Layout({ children }: LayoutProps) {
 
   return (
     <div className="min-h-screen">
-      <header className="border-b border-slate-200 bg-white backdrop-blur">
+      <header className="border-b border-slate-800 bg-slate-950/80 backdrop-blur">
         <div className="mx-auto flex max-w-[1850px] items-center justify-between px-6 py-4">
           <Link to="/" className="text-lg font-semibold text-white">
             Электронный журнал
           </Link>
 
-          <nav className="flex items-center gap-3 text-sm text-slate-700">
-            <NavLink to="/" className="rounded-xl px-3 py-2 hover:bg-slate-100">
+          <nav className="flex items-center gap-3 text-sm text-slate-300">
+            <NavLink to="/" className="rounded-xl px-3 py-2 hover:bg-slate-800">
               Главная
             </NavLink>
 
             {!role && (
               <>
-                <NavLink to="/login" className="rounded-xl px-3 py-2 hover:bg-slate-100">
+                <NavLink to="/login" className="rounded-xl px-3 py-2 hover:bg-slate-800">
                   Вход
                 </NavLink>
-                <NavLink to="/register" className="rounded-xl px-3 py-2 hover:bg-slate-100">
+                <NavLink to="/register" className="rounded-xl px-3 py-2 hover:bg-slate-800">
                   Регистрация
                 </NavLink>
               </>
@@ -55,10 +55,10 @@ export function Layout({ children }: LayoutProps) {
 
             {role && (
               <>
-                <NavLink to={dashboardLink} className="rounded-xl px-3 py-2 hover:bg-slate-100">
+                <NavLink to={dashboardLink} className="rounded-xl px-3 py-2 hover:bg-slate-800">
                   Кабинет
                 </NavLink>
-                <span className="hidden rounded-xl bg-slate-100 px-3 py-2 md:inline-flex">
+                <span className="hidden rounded-xl bg-slate-800 px-3 py-2 md:inline-flex">
                   {fullName}
                 </span>
                 <button

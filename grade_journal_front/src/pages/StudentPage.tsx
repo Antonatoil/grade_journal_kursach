@@ -38,7 +38,7 @@ export function StudentPage() {
   });
 
   if (isLoading) {
-    return <p className="text-slate-400">Загрузка профиля...</p>;
+    return <p className="text-slate-500">Загрузка профиля...</p>;
   }
 
   const directoryMode = getDirectoryMode(activePanel);
@@ -86,11 +86,11 @@ export function StudentPage() {
 
   return (
     <div className="w-full max-w-none min-w-0 space-y-6">
-      <section className="w-full max-w-none min-w-0 rounded-3xl border border-slate-800 bg-slate-900/70 p-8">
+      <section className="w-full max-w-none min-w-0 rounded-3xl border border-slate-200 bg-white p-8" shadow-sm>
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white">Главная панель студента</h1>
-            <p className="mt-2 max-w-4xl text-slate-400">
+            <h1 className="text-3xl font-bold text-slate-900">Главная панель студента</h1>
+            <p className="mt-2 max-w-4xl text-slate-500">
               Здесь собраны основные разделы студента: профиль, расписание, успеваемость,
               просмотр группы, сравнение групп и студентов, а также анализ по группам риска.
             </p>
@@ -98,7 +98,7 @@ export function StudentPage() {
 
           <button
             onClick={() => setActivePanel('home')}
-            className="rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 font-medium text-slate-200 hover:bg-slate-800"
+            className="rounded-2xl border border-slate-300 bg-white px-4 py-3 font-medium text-slate-700 hover:bg-slate-100"
           >
             На главную панель
           </button>
@@ -112,7 +112,7 @@ export function StudentPage() {
               className={`rounded-2xl px-5 py-4 text-left transition ${
                 activePanel === button.key
                   ? 'bg-blue-500 text-white'
-                  : 'bg-slate-950 text-slate-200 hover:bg-slate-800'
+                  : 'bg-white text-slate-700 hover:bg-slate-100'
               }`}
             >
               <div className="text-sm opacity-80">{button.subtitle}</div>
@@ -123,9 +123,9 @@ export function StudentPage() {
       </section>
 
       {activePanel === 'home' && (
-        <section className="w-full max-w-none min-w-0 rounded-3xl border border-slate-800 bg-slate-900/70 p-6 text-slate-300">
-          <h2 className="text-2xl font-semibold text-white">Рабочее пространство студента</h2>
-          <p className="mt-2 text-slate-400">
+        <section className="w-full max-w-none min-w-0 rounded-3xl border border-slate-200 bg-white p-6 text-slate-700" shadow-sm>
+          <h2 className="text-2xl font-semibold text-slate-900">Рабочее пространство студента</h2>
+          <p className="mt-2 text-slate-500">
             Выберите нужный раздел с помощью кнопок выше. Студент может смотреть свой профиль,
             расписание, успеваемость, состав группы и аналитические сводки.
           </p>
@@ -134,9 +134,9 @@ export function StudentPage() {
 
       {activePanel === 'profile' && (
         <section className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
-            <h2 className="mb-4 text-xl font-semibold text-white">Основная информация</h2>
-            <div className="space-y-3 text-slate-300">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6" shadow-sm>
+            <h2 className="mb-4 text-xl font-semibold text-slate-900">Основная информация</h2>
+            <div className="space-y-3 text-slate-700">
               <p>
                 <span className="text-slate-500">ФИО:</span> {data?.fullName}
               </p>
@@ -152,9 +152,9 @@ export function StudentPage() {
             </div>
           </div>
 
-          <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
-            <h2 className="mb-4 text-xl font-semibold text-white">Информация студента</h2>
-            <div className="space-y-3 text-slate-300">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6" shadow-sm>
+            <h2 className="mb-4 text-xl font-semibold text-slate-900">Информация студента</h2>
+            <div className="space-y-3 text-slate-700">
               <p>
                 <span className="text-slate-500">Студенческий билет:</span>{' '}
                 {data?.student?.studentCard || '—'}

@@ -133,19 +133,19 @@ export function PerformancePanel({ title, description }: Props) {
   );
 
   return (
-    <section className="space-y-5 rounded-3xl border border-slate-200 bg-white p-6" shadow-sm>
+    <section className="space-y-5 rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
       <div>
-        <h2 className="text-2xl font-semibold text-slate-900">{title}</h2>
-        <p className="mt-2 text-slate-500">{description}</p>
+        <h2 className="text-2xl font-semibold text-white">{title}</h2>
+        <p className="mt-2 text-slate-400">{description}</p>
       </div>
 
       <div className="grid gap-4 xl:grid-cols-2">
         <label className="space-y-2">
-          <span className="text-sm text-slate-500">Студент</span>
+          <span className="text-sm text-slate-400">Студент</span>
           <select
             value={studentId}
             onChange={(event) => setStudentId(event.target.value)}
-            className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400"
+            className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400"
           >
             <option value="">Выберите студента</option>
             {(studentsQuery.data ?? []).map((student) => (
@@ -157,11 +157,11 @@ export function PerformancePanel({ title, description }: Props) {
         </label>
 
         <label className="space-y-2">
-          <span className="text-sm text-slate-500">Предмет</span>
+          <span className="text-sm text-slate-400">Предмет</span>
           <select
             value={courseId}
             onChange={(event) => setCourseId(event.target.value)}
-            className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400"
+            className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400"
           >
             <option value="">Выберите предмет</option>
             {(coursesQuery.data ?? []).map((course) => (
@@ -176,53 +176,53 @@ export function PerformancePanel({ title, description }: Props) {
       {detailsQuery.data && (
         <>
           <div className="grid gap-4 md:grid-cols-3">
-            <div className="rounded-3xl border border-slate-200 bg-white p-4" shadow-sm>
-              <div className="text-sm text-slate-500">Средний балл по всем предметам</div>
+            <div className="rounded-3xl border border-slate-800 bg-slate-950/70 p-4">
+              <div className="text-sm text-slate-400">Средний балл по всем предметам</div>
               <div className="mt-2 text-3xl font-bold text-white">
                 {detailsQuery.data.averageAllCourses.toFixed(2)}
               </div>
             </div>
 
-            <div className="rounded-3xl border border-slate-200 bg-white p-4" shadow-sm>
-              <div className="text-sm text-slate-500">Средний балл по выбранному предмету</div>
+            <div className="rounded-3xl border border-slate-800 bg-slate-950/70 p-4">
+              <div className="text-sm text-slate-400">Средний балл по выбранному предмету</div>
               <div className="mt-2 text-3xl font-bold text-white">
                 {detailsQuery.data.averageSelectedCourse.toFixed(2)}
               </div>
             </div>
 
-            <div className="rounded-3xl border border-slate-200 bg-white p-4" shadow-sm>
-              <div className="text-sm text-slate-500">Прогнозная следующая оценка</div>
+            <div className="rounded-3xl border border-slate-800 bg-slate-950/70 p-4">
+              <div className="text-sm text-slate-400">Прогнозная следующая оценка</div>
               <div className="mt-2 text-3xl font-bold text-white">
                 {detailsQuery.data.predictedFinalGrade}
               </div>
             </div>
           </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-5" shadow-sm>
-            <h3 className="text-lg font-semibold text-slate-900">Рекомендации</h3>
-            <p className="mt-2 text-slate-700">{detailsQuery.data.recommendationSummary}</p>
+          <div className="rounded-3xl border border-slate-800 bg-slate-950/70 p-5">
+            <h3 className="text-lg font-semibold text-white">Рекомендации</h3>
+            <p className="mt-2 text-slate-300">{detailsQuery.data.recommendationSummary}</p>
 
-            <ul className="mt-4 space-y-2 text-slate-700">
+            <ul className="mt-4 space-y-2 text-slate-300">
               {(detailsQuery.data.recommendations ?? []).length > 0 ? (
                 detailsQuery.data.recommendations.map((recommendation, index) => (
                   <li
                     key={`${recommendation}-${index}`}
-                    className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3"
+                    className="rounded-2xl border border-slate-800 bg-slate-900 px-4 py-3"
                   >
                     {recommendation}
                   </li>
                 ))
               ) : (
-                <li className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                <li className="rounded-2xl border border-slate-800 bg-slate-900 px-4 py-3">
                   Рекомендации не требуются: результаты по предмету хорошие.
                 </li>
               )}
             </ul>
           </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-5" shadow-sm>
-            <h3 className="text-lg font-semibold text-slate-900">График оценок</h3>
-            <p className="mt-2 text-sm text-slate-500">
+          <div className="rounded-3xl border border-slate-800 bg-slate-950/70 p-5">
+            <h3 className="text-lg font-semibold text-white">График оценок</h3>
+            <p className="mt-2 text-sm text-slate-400">
               По оси X — номер оценки, по оси Y — балл. Последняя точка выделена отдельно как прогноз.
             </p>
 
@@ -279,9 +279,9 @@ export function PerformancePanel({ title, description }: Props) {
             </div>
           </div>
 
-          <div className="overflow-x-auto rounded-3xl border border-slate-200 bg-white">
-            <table className="min-w-full text-left text-sm text-slate-700">
-              <thead className="bg-slate-50 text-slate-500">
+          <div className="overflow-x-auto rounded-3xl border border-slate-800 bg-slate-950/70">
+            <table className="min-w-full text-left text-sm text-slate-300">
+              <thead className="bg-slate-900 text-slate-400">
                 <tr>
                   <th className="px-4 py-3 font-medium">№</th>
                   <th className="px-4 py-3 font-medium">Дата выставления</th>
@@ -291,11 +291,11 @@ export function PerformancePanel({ title, description }: Props) {
               </thead>
               <tbody>
                 {(detailsQuery.data.points ?? []).map((point) => (
-                  <tr key={`${point.orderNo}-${point.gradedAt}`} className="border-t border-slate-200">
+                  <tr key={`${point.orderNo}-${point.gradedAt}`} className="border-t border-slate-800">
                     <td className="px-4 py-3">{point.orderNo}</td>
                     <td className="px-4 py-3">{point.gradedAt}</td>
                     <td className="px-4 py-3">{point.gradeType}</td>
-                    <td className="px-4 py-3 font-semibold text-slate-900">{point.value}</td>
+                    <td className="px-4 py-3 font-semibold text-white">{point.value}</td>
                   </tr>
                 ))}
 

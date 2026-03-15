@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+﻿import { useMemo, useState } from 'react';
 import axios from 'axios';
 import { api } from '../lib/api';
 
@@ -129,23 +129,23 @@ export function ExcelExportPanel({ title, description }: Props) {
   };
 
   return (
-    <section className="space-y-5 rounded-3xl border border-slate-200 bg-white p-6" shadow-sm>
+    <section className="space-y-5 rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
       <div>
-        <h2 className="text-2xl font-semibold text-slate-900">{title}</h2>
-        <p className="mt-2 max-w-4xl text-slate-500">{description}</p>
+        <h2 className="text-2xl font-semibold text-white">{title}</h2>
+        <p className="mt-2 max-w-4xl text-slate-400">{description}</p>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {options.map((option) => (
           <label
             key={option.key}
-            className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-700"
+            className="flex items-center gap-3 rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-slate-200"
           >
             <input
               type="checkbox"
               checked={selected[option.key]}
               onChange={() => toggle(option.key)}
-              className="h-4 w-4 rounded border-slate-300 bg-slate-50"
+              className="h-4 w-4 rounded border-slate-600 bg-slate-900"
             />
             <span>{option.label}</span>
           </label>
@@ -162,13 +162,13 @@ export function ExcelExportPanel({ title, description }: Props) {
           {isLoading ? 'Формирование Excel...' : 'Скачать Excel-отчет'}
         </button>
 
-        <div className="text-sm text-slate-500">
+        <div className="text-sm text-slate-400">
           Выбрано разделов: {selectedCount}
         </div>
       </div>
 
       {message && (
-        <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700">
+        <div className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-300">
           {message}
         </div>
       )}

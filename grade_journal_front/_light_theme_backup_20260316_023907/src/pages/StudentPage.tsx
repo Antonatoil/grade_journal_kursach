@@ -4,7 +4,6 @@ import { api } from '../lib/api';
 import { PerformancePanel } from '../components/PerformancePanel';
 import { StudentProfileViewerPanel } from '../components/StudentProfileViewerPanel';
 import { GroupViewerPanel } from '../components/GroupViewerPanel';
-import { ExcelExportPanel } from '../components/ExcelExportPanel';
 import { SchedulePanel } from '../components/SchedulePanel';
 import { UserDirectoryPanel, type DirectoryControlMode } from '../components/UserDirectoryPanel';
 import type { ProfileResponse } from '../types/profile';
@@ -12,7 +11,6 @@ import { TeacherSchedulePanel } from '../components/TeacherSchedulePanel';
 import { GroupComparisonPanel } from '../components/GroupComparisonPanel';
 import { StudentComparisonPanel } from '../components/StudentComparisonPanel';
 import { RiskGroupsPanel } from '../components/RiskGroupsPanel';
-import { TeacherGradingPanel } from '../components/TeacherGradingPanel';
 
 type PanelKey =
   | 'home'
@@ -20,20 +18,18 @@ type PanelKey =
   | 'directory-explorer'
   | 'schedule'
   | 'teacher-schedule'
-  | 'teacher-grading'
   | 'performance'
   | 'student-profile'
   | 'group-viewer'
   | 'group-comparison'
   | 'student-comparison'
-  | 'risk-groups'
-  | 'excel-export';
+  | 'risk-groups';
 
 function getDirectoryMode(panel: PanelKey): DirectoryControlMode | null {
   return panel === 'directory-explorer' ? 'explorer' : null;
 }
 
-export function TeacherPage() {
+export function StudentPage() {
   const [activePanel, setActivePanel] = useState<PanelKey>('home');
 
   const { data, isLoading } = useQuery({
@@ -42,13 +38,13 @@ export function TeacherPage() {
   });
 
   if (isLoading) {
-    return <p className="text-slate-500">Загрузка профиля...</p>;
+    return <p className="text-slate-400">Загрузка профиля...</p>;
   }
 
   const directoryMode = getDirectoryMode(activePanel);
 
   const buttons: Array<{ key: PanelKey; title: string; subtitle: string }> = [
-    { key: 'profile', title: 'Мой профиль', subtitle: 'Личные данные преподавателя' },
+    { key: 'profile', title: 'Мой профиль', subtitle: 'Личные данные студента' },
     {
       key: 'directory-explorer',
       title: 'Поиск, фильтр и сортировка',
@@ -59,11 +55,6 @@ export function TeacherPage() {
       key: 'teacher-schedule',
       title: 'Расписание преподавателей',
       subtitle: 'Пары выбранного преподавателя'
-    },
-    {
-      key: 'teacher-grading',
-      title: 'Оценки студента',
-      subtitle: 'Выставление оценок и пропусков'
     },
     {
       key: 'performance',
@@ -90,30 +81,24 @@ export function TeacherPage() {
       key: 'risk-groups',
       title: 'Группы риска',
       subtitle: 'Распределение студентов по рискам'
-    },
-    {
-      key: 'excel-export',
-      title: 'Экспорт в Excel',
-      subtitle: 'Формирование отчетов'
     }
   ];
 
   return (
     <div className="w-full max-w-none min-w-0 space-y-6">
-      <section className="w-full max-w-none min-w-0 rounded-3xl border border-slate-200 bg-white p-8" shadow-sm>
+      <section className="w-full max-w-none min-w-0 rounded-3xl border border-slate-800 bg-slate-900/70 p-8">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Главная панель преподавателя</h1>
-            <p className="mt-2 max-w-4xl text-slate-500">
-              Здесь собраны все основные разделы для работы преподавателя: просмотр профиля,
-              расписание, выставление оценок, работа с успеваемостью, просмотр студентов,
-              аналитика по группам и экспорт отчетов.
+            <h1 className="text-3xl font-bold text-white">Главная панель студента</h1>
+            <p className="mt-2 max-w-4xl text-slate-400">
+              Здесь собраны основные разделы студента: профиль, расписание, успеваемость,
+              просмотр группы, сравнение групп и студентов, а также анализ по группам риска.
             </p>
           </div>
 
           <button
             onClick={() => setActivePanel('home')}
-            className="rounded-2xl border border-slate-300 bg-white px-4 py-3 font-medium text-slate-700 hover:bg-slate-100"
+            className="rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 font-medium text-slate-200 hover:bg-slate-800"
           >
             На главную панель
           </button>
@@ -127,7 +112,7 @@ export function TeacherPage() {
               className={`rounded-2xl px-5 py-4 text-left transition ${
                 activePanel === button.key
                   ? 'bg-blue-500 text-white'
-                  : 'bg-white text-slate-700 hover:bg-slate-100'
+                  : 'bg-slate-950 text-slate-200 hover:bg-slate-800'
               }`}
             >
               <div className="text-sm opacity-80">{button.subtitle}</div>
@@ -138,21 +123,20 @@ export function TeacherPage() {
       </section>
 
       {activePanel === 'home' && (
-        <section className="w-full max-w-none min-w-0 rounded-3xl border border-slate-200 bg-white p-6 text-slate-700" shadow-sm>
-          <h2 className="text-2xl font-semibold text-slate-900">Рабочее пространство преподавателя</h2>
-          <p className="mt-2 text-slate-500">
-            Выберите нужный раздел с помощью кнопок выше. Преподаватель может просматривать
-            расписание, выставлять оценки и посещаемость, анализировать результаты студентов,
-            сравнивать группы и формировать Excel-отчеты.
+        <section className="w-full max-w-none min-w-0 rounded-3xl border border-slate-800 bg-slate-900/70 p-6 text-slate-300">
+          <h2 className="text-2xl font-semibold text-white">Рабочее пространство студента</h2>
+          <p className="mt-2 text-slate-400">
+            Выберите нужный раздел с помощью кнопок выше. Студент может смотреть свой профиль,
+            расписание, успеваемость, состав группы и аналитические сводки.
           </p>
         </section>
       )}
 
       {activePanel === 'profile' && (
         <section className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-3xl border border-slate-200 bg-white p-6" shadow-sm>
-            <h2 className="mb-4 text-xl font-semibold text-slate-900">Основная информация</h2>
-            <div className="space-y-3 text-slate-700">
+          <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
+            <h2 className="mb-4 text-xl font-semibold text-white">Основная информация</h2>
+            <div className="space-y-3 text-slate-300">
               <p>
                 <span className="text-slate-500">ФИО:</span> {data?.fullName}
               </p>
@@ -163,29 +147,33 @@ export function TeacherPage() {
                 <span className="text-slate-500">Email:</span> {data?.email || '—'}
               </p>
               <p>
-                <span className="text-slate-500">Роль:</span> Преподаватель
+                <span className="text-slate-500">Роль:</span> Студент
               </p>
             </div>
           </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-6" shadow-sm>
-            <h2 className="mb-4 text-xl font-semibold text-slate-900">Информация преподавателя</h2>
-            <div className="space-y-3 text-slate-700">
+          <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
+            <h2 className="mb-4 text-xl font-semibold text-white">Информация студента</h2>
+            <div className="space-y-3 text-slate-300">
               <p>
-                <span className="text-slate-500">Кафедра:</span>{' '}
-                {data?.teacher?.departmentName || '—'}
+                <span className="text-slate-500">Студенческий билет:</span>{' '}
+                {data?.student?.studentCard || '—'}
               </p>
               <p>
-                <span className="text-slate-500">Код кафедры:</span>{' '}
-                {data?.teacher?.departmentCode || '—'}
+                <span className="text-slate-500">Группа:</span>{' '}
+                {data?.student?.groupCode || '—'}
               </p>
               <p>
-                <span className="text-slate-500">Должность:</span>{' '}
-                {data?.teacher?.position || '—'}
+                <span className="text-slate-500">Курс:</span>{' '}
+                {data?.student?.courseNo || '—'}
               </p>
               <p>
-                <span className="text-slate-500">Телефон:</span>{' '}
-                {data?.teacher?.phone || '—'}
+                <span className="text-slate-500">Факультет:</span>{' '}
+                {data?.student?.facultyName || '—'}
+              </p>
+              <p>
+                <span className="text-slate-500">Специальность:</span>{' '}
+                {data?.student?.specializationName || '—'}
               </p>
             </div>
           </div>
@@ -196,7 +184,7 @@ export function TeacherPage() {
         <div className="directory-panel-shell w-full max-w-none min-w-0">
           <UserDirectoryPanel
           endpoint="/api/users/directory"
-          queryKey={['directory', 'teacher']}
+          queryKey={['directory', 'student']}
           title="Поиск, фильтр и сортировка"
           description="Используйте единое окно поиска, фильтров и сортировки для просмотра справочника пользователей."
           activeControl={directoryMode}
@@ -209,7 +197,7 @@ export function TeacherPage() {
           <SchedulePanel
           canManage={false}
           title="Расписание"
-          description="Преподаватель может просматривать расписание выбранной группы."
+          description="Студент может просматривать расписание выбранной группы."
          />
         </div>
       )}
@@ -217,14 +205,7 @@ export function TeacherPage() {
       {activePanel === 'teacher-schedule' && (
         <TeacherSchedulePanel
           title="Расписание преподавателей"
-          description="Выберите преподавателя, чтобы увидеть список его пар."
-        />
-      )}
-
-      {activePanel === 'teacher-grading' && (
-        <TeacherGradingPanel
-          title="Оценки студента"
-          description="Выберите группу, затем пару, после чего отредактируйте присутствие, оценки и комментарии по этой паре."
+          description="Выберите преподавателя, чтобы увидеть его пары."
         />
       )}
 
@@ -237,15 +218,15 @@ export function TeacherPage() {
 
       {activePanel === 'student-profile' && (
         <StudentProfileViewerPanel
-          title="Профиль студента"
-          description="Преподаватель может найти любого студента и просмотреть его профиль, оценки по всем предметам, прогнозы и рекомендации."
+          title="Мой профиль студента"
+          description="Студент видит только свой профиль, все оценки по предметам, прогнозы и рекомендации."
         />
       )}
 
       {activePanel === 'group-viewer' && (
         <GroupViewerPanel
           title="Просмотр групп"
-          description="Преподаватель может выбрать любую группу и посмотреть состав группы с базовой информацией о студентах."
+          description="Студент может выбрать группу и посмотреть список студентов этой группы с базовой информацией."
         />
       )}
 
@@ -267,13 +248,6 @@ export function TeacherPage() {
         <RiskGroupsPanel
           title="Группы риска"
           description="Распределение студентов на три группы по среднему баллу."
-        />
-      )}
-
-      {activePanel === 'excel-export' && (
-        <ExcelExportPanel
-          title="Экспорт в Excel"
-          description="Преподаватель может выбрать нужные разделы и скачать Excel-отчет по журналу успеваемости."
         />
       )}
     </div>

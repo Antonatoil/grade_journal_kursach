@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../lib/api';
 import type { StudentProfileOption, StudentProfileResponse } from '../types/studentProfile';
@@ -65,29 +65,29 @@ export function StudentProfileViewerPanel({ title, description }: Props) {
     'Не удалось загрузить профиль студента.';
 
   return (
-    <section className="space-y-5 rounded-3xl border border-slate-200 bg-white p-6" shadow-sm>
+    <section className="space-y-5 rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
       <div>
-        <h2 className="text-2xl font-semibold text-slate-900">{title}</h2>
-        <p className="mt-2 text-slate-500">{description}</p>
+        <h2 className="text-2xl font-semibold text-white">{title}</h2>
+        <p className="mt-2 text-slate-400">{description}</p>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
         <label className="space-y-2">
-          <span className="text-sm text-slate-500">Поиск студента</span>
+          <span className="text-sm text-slate-400">Поиск студента</span>
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="ФИО, email, группа или студенческий билет"
-            className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400"
+            className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400"
           />
         </label>
 
         <label className="space-y-2">
-          <span className="text-sm text-slate-500">Студент</span>
+          <span className="text-sm text-slate-400">Студент</span>
           <select
             value={studentId}
             onChange={(event) => setStudentId(event.target.value)}
-            className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400"
+            className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400"
           >
             {(optionsQuery.data ?? []).map((option) => (
               <option key={option.studentId} value={option.studentId}>
@@ -98,7 +98,7 @@ export function StudentProfileViewerPanel({ title, description }: Props) {
         </label>
       </div>
 
-      {optionsQuery.isLoading && <p className="text-slate-500">Загрузка списка студентов...</p>}
+      {optionsQuery.isLoading && <p className="text-slate-400">Загрузка списка студентов...</p>}
 
       {!optionsQuery.isLoading && (optionsQuery.data ?? []).length === 0 && (
         <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-amber-200">
@@ -106,7 +106,7 @@ export function StudentProfileViewerPanel({ title, description }: Props) {
         </div>
       )}
 
-      {profileQuery.isLoading && <p className="text-slate-500">Загрузка профиля студента...</p>}
+      {profileQuery.isLoading && <p className="text-slate-400">Загрузка профиля студента...</p>}
 
       {profileQuery.isError && (
         <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-rose-200">
@@ -117,25 +117,25 @@ export function StudentProfileViewerPanel({ title, description }: Props) {
       {profileQuery.data && (
         <>
           <div className="grid gap-4 xl:grid-cols-3">
-            <div className="rounded-3xl border border-slate-200 bg-white p-5" shadow-sm>
+            <div className="rounded-3xl border border-slate-800 bg-slate-950/80 p-5">
               <div className="text-sm text-slate-500">ФИО</div>
               <div className="mt-2 text-xl font-semibold text-white">{profileQuery.data.fullName}</div>
-              <div className="mt-3 text-sm text-slate-500">Логин: {profileQuery.data.username}</div>
-              <div className="text-sm text-slate-500">Email: {profileQuery.data.email || '—'}</div>
+              <div className="mt-3 text-sm text-slate-400">Логин: {profileQuery.data.username}</div>
+              <div className="text-sm text-slate-400">Email: {profileQuery.data.email || '—'}</div>
             </div>
-            <div className="rounded-3xl border border-slate-200 bg-white p-5" shadow-sm>
+            <div className="rounded-3xl border border-slate-800 bg-slate-950/80 p-5">
               <div className="text-sm text-slate-500">Учебные данные</div>
-              <div className="mt-2 space-y-2 text-sm text-slate-700">
+              <div className="mt-2 space-y-2 text-sm text-slate-300">
                 <div>Группа: <span className="text-white">{profileQuery.data.groupCode}</span></div>
                 <div>Курс: <span className="text-white">{profileQuery.data.courseNo}</span></div>
                 <div>Студенческий билет: <span className="text-white">{profileQuery.data.studentCard || '—'}</span></div>
               </div>
             </div>
-            <div className="rounded-3xl border border-slate-200 bg-white p-5" shadow-sm>
+            <div className="rounded-3xl border border-slate-800 bg-slate-950/80 p-5">
               <div className="text-sm text-slate-500">Факультет и специальность</div>
-              <div className="mt-2 text-sm text-slate-700">{profileQuery.data.facultyName}</div>
+              <div className="mt-2 text-sm text-slate-300">{profileQuery.data.facultyName}</div>
               <div className="mt-2 text-sm text-white">{profileQuery.data.specializationName}</div>
-              <div className="mt-4 text-sm text-slate-500">
+              <div className="mt-4 text-sm text-slate-400">
                 Статус: {profileQuery.data.active ? 'активен' : 'не активен'} · {profileQuery.data.approved ? 'одобрен' : 'не одобрен'}
               </div>
             </div>
@@ -143,20 +143,20 @@ export function StudentProfileViewerPanel({ title, description }: Props) {
 
           <div className="space-y-4">
             {profileQuery.data.subjects.length === 0 && (
-              <div className="rounded-2xl border border-slate-200 bg-white px-4 py-6 text-center text-slate-500">
+              <div className="rounded-2xl border border-slate-800 bg-slate-950/80 px-4 py-6 text-center text-slate-500">
                 У этого студента пока нет учебных записей и оценок.
               </div>
             )}
 
             {profileQuery.data.subjects.map((subject) => (
-              <div key={subject.courseId} className="rounded-3xl border border-slate-200 bg-white p-5" shadow-sm>
+              <div key={subject.courseId} className="rounded-3xl border border-slate-800 bg-slate-950/70 p-5">
                 <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                   <div>
-                    <h3 className="text-xl font-semibold text-slate-900">{subject.courseName}</h3>
-                    <p className="mt-1 text-sm text-slate-500">{subject.courseCode}</p>
+                    <h3 className="text-xl font-semibold text-white">{subject.courseName}</h3>
+                    <p className="mt-1 text-sm text-slate-400">{subject.courseCode}</p>
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                    <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                    <div className="rounded-2xl border border-slate-800 bg-slate-900/80 px-4 py-3">
                       <div className="text-xs uppercase tracking-wide text-slate-500">Средний балл</div>
                       <div className="mt-1 text-lg font-semibold text-white">{subject.averageGrade.toFixed(2)}</div>
                     </div>
@@ -164,20 +164,20 @@ export function StudentProfileViewerPanel({ title, description }: Props) {
                       <div className="text-xs uppercase tracking-wide text-blue-200">Прогнозный балл</div>
                       <div className="mt-1 text-lg font-semibold text-white">{subject.predictedGrade.toFixed(2)}</div>
                     </div>
-                    <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                    <div className="rounded-2xl border border-slate-800 bg-slate-900/80 px-4 py-3">
                       <div className="text-xs uppercase tracking-wide text-slate-500">Посещаемость</div>
                       <div className="mt-1 text-lg font-semibold text-white">{subject.attendanceRate.toFixed(2)}%</div>
                     </div>
-                    <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                    <div className="rounded-2xl border border-slate-800 bg-slate-900/80 px-4 py-3">
                       <div className="text-xs uppercase tracking-wide text-slate-500">Риск / пропуски</div>
                       <div className="mt-1 text-lg font-semibold text-white">{riskLabel(subject.riskLevel)} · {subject.missedHours} ч</div>
                     </div>
                   </div>
                 </div>
 
-                <div className="mt-5 overflow-x-auto rounded-2xl border border-slate-200">
-                  <table className="min-w-full text-left text-sm text-slate-700">
-                    <thead className="bg-slate-50 text-slate-500">
+                <div className="mt-5 overflow-x-auto rounded-2xl border border-slate-800">
+                  <table className="min-w-full text-left text-sm text-slate-300">
+                    <thead className="bg-slate-900 text-slate-400">
                       <tr>
                         <th className="px-4 py-3 font-medium">Дата</th>
                         <th className="px-4 py-3 font-medium">Оценка</th>
@@ -194,9 +194,9 @@ export function StudentProfileViewerPanel({ title, description }: Props) {
                         </tr>
                       )}
                       {subject.grades.map((grade, index) => (
-                        <tr key={`${subject.courseId}-${index}`} className="border-t border-slate-200">
+                        <tr key={`${subject.courseId}-${index}`} className="border-t border-slate-800">
                           <td className="px-4 py-3">{formatDate(grade.gradedDate)}</td>
-                          <td className="px-4 py-3 font-semibold text-slate-900">{grade.gradeValue.toFixed(2)}</td>
+                          <td className="px-4 py-3 font-semibold text-white">{grade.gradeValue.toFixed(2)}</td>
                           <td className="px-4 py-3">{grade.assessmentType}</td>
                           <td className="px-4 py-3">{grade.assessmentTitle}</td>
                         </tr>
@@ -206,15 +206,15 @@ export function StudentProfileViewerPanel({ title, description }: Props) {
                 </div>
 
                 <div className="mt-4">
-                  <div className="mb-2 text-sm font-medium text-slate-700">Рекомендации</div>
+                  <div className="mb-2 text-sm font-medium text-slate-300">Рекомендации</div>
                   {subject.recommendations.length === 0 ? (
-                    <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-500">
+                    <div className="rounded-2xl border border-slate-800 bg-slate-900/80 px-4 py-3 text-sm text-slate-500">
                       Для этого предмета пока нет рекомендаций.
                     </div>
                   ) : (
                     <div className="space-y-2">
                       {subject.recommendations.map((item, index) => (
-                        <div key={`${subject.courseId}-rec-${index}`} className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700">
+                        <div key={`${subject.courseId}-rec-${index}`} className="rounded-2xl border border-slate-800 bg-slate-900/80 px-4 py-3 text-sm text-slate-300">
                           {item}
                         </div>
                       ))}

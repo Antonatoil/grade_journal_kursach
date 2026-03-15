@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../lib/api';
 
@@ -50,19 +50,19 @@ export function GroupViewerPanel({ title, description }: Props) {
   const selectedGroup = (groupsQuery.data ?? []).find((group) => String(group.groupId) === selectedGroupId) ?? null;
 
   return (
-    <section className="space-y-5 rounded-3xl border border-slate-200 bg-white p-6" shadow-sm>
+    <section className="space-y-5 rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
       <div>
-        <h2 className="text-2xl font-semibold text-slate-900">{title}</h2>
-        <p className="mt-2 max-w-4xl text-slate-500">{description}</p>
+        <h2 className="text-2xl font-semibold text-white">{title}</h2>
+        <p className="mt-2 max-w-4xl text-slate-400">{description}</p>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[360px,1fr] lg:items-end">
         <label className="space-y-2">
-          <span className="text-sm text-slate-500">Группа</span>
+          <span className="text-sm text-slate-400">Группа</span>
           <select
             value={selectedGroupId}
             onChange={(event) => setSelectedGroupId(event.target.value)}
-            className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400"
+            className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400"
           >
             {(groupsQuery.data ?? []).map((group) => (
               <option key={group.groupId} value={group.groupId}>
@@ -73,7 +73,7 @@ export function GroupViewerPanel({ title, description }: Props) {
         </label>
 
         {selectedGroup && (
-          <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700">
+          <div className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-300">
             <div className="font-medium text-white">{selectedGroup.groupCode}</div>
             <div className="mt-1">Курс: {selectedGroup.courseNo}</div>
             <div className="mt-1">Факультет: {selectedGroup.facultyName}</div>
@@ -82,10 +82,10 @@ export function GroupViewerPanel({ title, description }: Props) {
         )}
       </div>
 
-      <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white">
+      <div className="overflow-hidden rounded-3xl border border-slate-800 bg-slate-950/70">
         <div className="overflow-x-auto">
-          <table className="min-w-full text-left text-sm text-slate-700">
-            <thead className="bg-slate-50 text-slate-500">
+          <table className="min-w-full text-left text-sm text-slate-300">
+            <thead className="bg-slate-900 text-slate-400">
               <tr>
                 <th className="px-4 py-3 font-medium">ФИО</th>
                 <th className="px-4 py-3 font-medium">Логин</th>
@@ -99,8 +99,8 @@ export function GroupViewerPanel({ title, description }: Props) {
             </thead>
             <tbody>
               {(studentsQuery.data ?? []).map((student) => (
-                <tr key={student.studentId} className="border-t border-slate-200">
-                  <td className="px-4 py-3 font-medium text-slate-900">{student.fullName}</td>
+                <tr key={student.studentId} className="border-t border-slate-800">
+                  <td className="px-4 py-3 font-medium text-white">{student.fullName}</td>
                   <td className="px-4 py-3">{student.username}</td>
                   <td className="px-4 py-3">{student.email || '—'}</td>
                   <td className="px-4 py-3">{student.groupCode}</td>
@@ -115,9 +115,9 @@ export function GroupViewerPanel({ title, description }: Props) {
         </div>
       </div>
 
-      {studentsQuery.isLoading && <div className="text-sm text-slate-500">Загрузка студентов группы…</div>}
+      {studentsQuery.isLoading && <div className="text-sm text-slate-400">Загрузка студентов группы…</div>}
       {studentsQuery.isError && <div className="text-sm text-rose-300">Не удалось загрузить студентов выбранной группы.</div>}
-      {studentsQuery.data && studentsQuery.data.length === 0 && <div className="text-sm text-slate-500">В выбранной группе пока нет студентов.</div>}
+      {studentsQuery.data && studentsQuery.data.length === 0 && <div className="text-sm text-slate-400">В выбранной группе пока нет студентов.</div>}
     </section>
   );
 }

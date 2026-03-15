@@ -21,15 +21,15 @@ export function GroupComparisonPanel({ title, description }: Props) {
   });
 
   return (
-    <section className="space-y-5 rounded-3xl border border-slate-200 bg-white p-6" shadow-sm>
+    <section className="space-y-5 rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
       <div>
-        <h2 className="text-2xl font-semibold text-slate-900">{title}</h2>
-        <p className="mt-2 text-slate-500">{description}</p>
+        <h2 className="text-2xl font-semibold text-white">{title}</h2>
+        <p className="mt-2 text-slate-400">{description}</p>
       </div>
 
-      <div className="overflow-x-auto rounded-3xl border border-slate-200 bg-white">
-        <table className="min-w-full text-left text-sm text-slate-700">
-          <thead className="bg-slate-50 text-slate-500">
+      <div className="overflow-x-auto rounded-3xl border border-slate-800 bg-slate-950/70">
+        <table className="min-w-full text-left text-sm text-slate-300">
+          <thead className="bg-slate-900 text-slate-400">
             <tr>
               <th className="px-4 py-3 font-medium">Группа</th>
               <th className="px-4 py-3 font-medium">Курс</th>
@@ -39,8 +39,8 @@ export function GroupComparisonPanel({ title, description }: Props) {
           </thead>
           <tbody>
             {(query.data ?? []).map((group) => (
-              <tr key={group.groupId} className="border-t border-slate-200">
-                <td className="px-4 py-3 font-medium text-slate-900">{group.groupCode}</td>
+              <tr key={group.groupId} className="border-t border-slate-800">
+                <td className="px-4 py-3 font-medium text-white">{group.groupCode}</td>
                 <td className="px-4 py-3">{group.courseNo}</td>
                 <td className="px-4 py-3">{group.studentCount}</td>
                 <td className="px-4 py-3">{group.averageGrade}</td>

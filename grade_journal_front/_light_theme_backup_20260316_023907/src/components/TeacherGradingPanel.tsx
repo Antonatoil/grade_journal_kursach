@@ -149,10 +149,10 @@ export function TeacherGradingPanel({ title, description }: Props) {
   };
 
   return (
-    <section className="space-y-5 rounded-3xl border border-slate-200 bg-white p-6" shadow-sm>
+    <section className="space-y-5 rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
       <div>
-        <h2 className="text-2xl font-semibold text-slate-900">{title}</h2>
-        <p className="mt-2 text-slate-500">{description}</p>
+        <h2 className="text-2xl font-semibold text-white">{title}</h2>
+        <p className="mt-2 text-slate-400">{description}</p>
       </div>
 
       {message && (
@@ -163,14 +163,14 @@ export function TeacherGradingPanel({ title, description }: Props) {
 
       <div className="grid gap-4 xl:grid-cols-2">
         <label className="space-y-2">
-          <span className="text-sm text-slate-500">Группа</span>
+          <span className="text-sm text-slate-400">Группа</span>
           <select
             value={groupId}
             onChange={(event) => {
               setGroupId(event.target.value);
               setScheduleId('');
             }}
-            className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400"
+            className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400"
           >
             <option value="">Выберите группу</option>
             {(groupsQuery.data ?? []).map((group) => (
@@ -182,11 +182,11 @@ export function TeacherGradingPanel({ title, description }: Props) {
         </label>
 
         <label className="space-y-2">
-          <span className="text-sm text-slate-500">Пара</span>
+          <span className="text-sm text-slate-400">Пара</span>
           <select
             value={scheduleId}
             onChange={(event) => setScheduleId(event.target.value)}
-            className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400"
+            className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400"
           >
             <option value="">Выберите пару</option>
             {(lessonsQuery.data ?? []).map((lesson) => (
@@ -199,17 +199,17 @@ export function TeacherGradingPanel({ title, description }: Props) {
       </div>
 
       {selectedLesson && (
-        <div className="rounded-3xl border border-slate-200 bg-white p-4 text-sm text-slate-700" shadow-sm>
-          <div><span className="text-slate-500">Предмет:</span> {selectedLesson.courseName}</div>
-          <div><span className="text-slate-500">Группа:</span> {selectedLesson.groupCode}</div>
-          <div><span className="text-slate-500">Дата и время:</span> {selectedLesson.lessonDate} | {selectedLesson.timeSlot}</div>
-          <div><span className="text-slate-500">Тема:</span> {selectedLesson.topic || '—'}</div>
+        <div className="rounded-3xl border border-slate-800 bg-slate-950/70 p-4 text-sm text-slate-300">
+          <div><span className="text-slate-400">Предмет:</span> {selectedLesson.courseName}</div>
+          <div><span className="text-slate-400">Группа:</span> {selectedLesson.groupCode}</div>
+          <div><span className="text-slate-400">Дата и время:</span> {selectedLesson.lessonDate} | {selectedLesson.timeSlot}</div>
+          <div><span className="text-slate-400">Тема:</span> {selectedLesson.topic || '—'}</div>
         </div>
       )}
 
-      <div className="overflow-x-auto rounded-3xl border border-slate-200 bg-white">
-        <table className="min-w-full text-left text-sm text-slate-700">
-          <thead className="bg-slate-50 text-slate-500">
+      <div className="overflow-x-auto rounded-3xl border border-slate-800 bg-slate-950/70">
+        <table className="min-w-full text-left text-sm text-slate-300">
+          <thead className="bg-slate-900 text-slate-400">
             <tr>
               <th className="px-4 py-3 font-medium">ФИО</th>
               <th className="px-4 py-3 font-medium">Студенческий билет</th>
@@ -221,8 +221,8 @@ export function TeacherGradingPanel({ title, description }: Props) {
           </thead>
           <tbody>
             {rows.map((row, index) => (
-              <tr key={row.enrollmentId} className="border-t border-slate-200">
-                <td className="px-4 py-3 font-medium text-slate-900">{row.fullName}</td>
+              <tr key={row.enrollmentId} className="border-t border-slate-800">
+                <td className="px-4 py-3 font-medium text-white">{row.fullName}</td>
                 <td className="px-4 py-3">{row.studentCard}</td>
                 <td className="px-4 py-3">
                   <input
@@ -241,21 +241,21 @@ export function TeacherGradingPanel({ title, description }: Props) {
                     step="1"
                     value={row.gradeValue}
                     onChange={(event) => updateRow(index, { gradeValue: event.target.value })}
-                    className="w-28 rounded-2xl border border-slate-300 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-blue-400"
+                    className="w-28 rounded-2xl border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100 outline-none focus:border-blue-400"
                   />
                 </td>
                 <td className="px-4 py-3">
                   <input
                     value={row.teacherComment}
                     onChange={(event) => updateRow(index, { teacherComment: event.target.value })}
-                    className="w-full min-w-[220px] rounded-2xl border border-slate-300 bg-slate-50 px-3 py-2 text-slate-800 outline-none focus:border-blue-400"
+                    className="w-full min-w-[220px] rounded-2xl border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100 outline-none focus:border-blue-400"
                   />
                 </td>
               </tr>
             ))}
             {scheduleId && !rows.length && (
-              <tr className="border-t border-slate-200">
-                <td colSpan={6} className="px-4 py-6 text-center text-slate-500">
+              <tr className="border-t border-slate-800">
+                <td colSpan={6} className="px-4 py-6 text-center text-slate-400">
                   Для выбранной пары студенты не найдены.
                 </td>
               </tr>

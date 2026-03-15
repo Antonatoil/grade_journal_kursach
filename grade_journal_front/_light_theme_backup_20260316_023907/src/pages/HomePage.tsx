@@ -19,18 +19,18 @@ export function HomePage() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-2xl" shadow-sm>
+      <section className="rounded-3xl border border-slate-800 bg-slate-900/70 p-8 shadow-2xl">
         <div className="grid gap-8 md:grid-cols-[1.5fr_1fr] md:items-center">
           <div className="space-y-5">
             <span className="inline-flex rounded-full bg-blue-500/20 px-4 py-2 text-sm font-medium text-blue-300">
               Курсовой проект
             </span>
 
-            <h1 className="text-4xl font-bold leading-tight text-slate-900">
+            <h1 className="text-4xl font-bold leading-tight text-white">
               Электронный журнал успеваемости с модулем прогнозирования оценок
             </h1>
 
-            <p className="max-w-2xl text-base leading-7 text-slate-700">
+            <p className="max-w-2xl text-base leading-7 text-slate-300">
               В системе доступны главная страница, вход, регистрация с отправкой заявки
               администратору, личные кабинеты по ролям и проверка подключения к базе данных.
             </p>
@@ -45,18 +45,18 @@ export function HomePage() {
 
               <Link
                 to="/register"
-                className="rounded-2xl border border-slate-300 px-5 py-3 font-semibold text-slate-800 hover:bg-slate-100"
+                className="rounded-2xl border border-slate-700 px-5 py-3 font-semibold text-slate-100 hover:bg-slate-800"
               >
                 Зарегистрироваться
               </Link>
             </div>
           </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-6" shadow-sm>
-            <h2 className="mb-4 text-xl font-semibold text-slate-900">Статус backend и БД</h2>
+          <div className="rounded-3xl border border-slate-800 bg-slate-950/60 p-6">
+            <h2 className="mb-4 text-xl font-semibold text-white">Статус backend и БД</h2>
 
             {isLoading ? (
-              <p className="text-slate-500">Проверка подключения...</p>
+              <p className="text-slate-400">Проверка подключения...</p>
             ) : (
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
@@ -65,12 +65,12 @@ export function HomePage() {
                       data?.connected ? 'bg-emerald-400' : 'bg-rose-400'
                     }`}
                   />
-                  <span className="text-slate-700">
+                  <span className="text-slate-200">
                     {data?.connected ? 'PostgreSQL подключен' : 'Подключение отсутствует'}
                   </span>
                 </div>
 
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-slate-400">
                   {data?.database ? `База данных: ${data.database}` : data?.message}
                 </p>
               </div>
@@ -80,23 +80,23 @@ export function HomePage() {
       </section>
 
       <section className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6" shadow-sm>
-          <h3 className="mb-3 text-lg font-semibold text-slate-900">Администратор</h3>
-          <p className="text-sm leading-6 text-slate-700">
+        <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
+          <h3 className="mb-3 text-lg font-semibold text-white">Администратор</h3>
+          <p className="text-sm leading-6 text-slate-300">
             Просматривает заявки на регистрацию, одобряет или отклоняет их, управляет доступом.
           </p>
         </div>
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-6" shadow-sm>
-          <h3 className="mb-3 text-lg font-semibold text-slate-900">Преподаватель</h3>
-          <p className="text-sm leading-6 text-slate-700">
+        <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
+          <h3 className="mb-3 text-lg font-semibold text-white">Преподаватель</h3>
+          <p className="text-sm leading-6 text-slate-300">
             Входит в систему после одобрения и получает личный кабинет с основными данными профиля.
           </p>
         </div>
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-6" shadow-sm>
-          <h3 className="mb-3 text-lg font-semibold text-slate-900">Студент</h3>
-          <p className="text-sm leading-6 text-slate-700">
+        <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
+          <h3 className="mb-3 text-lg font-semibold text-white">Студент</h3>
+          <p className="text-sm leading-6 text-slate-300">
             Регистрируется, ждет одобрения администратора и после входа получает доступ к своему кабинету.
           </p>
         </div>

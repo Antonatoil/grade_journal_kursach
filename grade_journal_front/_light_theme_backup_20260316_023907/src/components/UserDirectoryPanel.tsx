@@ -166,14 +166,14 @@ export function UserDirectoryPanel({
   const wideManagement = activeControl === 'management';
 
   return (
-    <section className={`space-y-5 rounded-3xl border border-slate-200 bg-white ${wideManagement ? 'p-7' : 'p-6'}`}>
+    <section className={`space-y-5 rounded-3xl border border-slate-800 bg-slate-900/70 ${wideManagement ? 'p-7' : 'p-6'}`}>
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <h2 className="text-2xl font-semibold text-slate-900">{title}</h2>
-          <p className="mt-2 max-w-4xl text-slate-500">{description}</p>
+          <h2 className="text-2xl font-semibold text-white">{title}</h2>
+          <p className="mt-2 max-w-4xl text-slate-400">{description}</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700">
+          <div className="rounded-2xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-300">
             Найдено записей: <span className="font-semibold text-white">{filteredUsers.length}</span>
           </div>
           {editable && activeControl === 'management' && onCreate && (
@@ -188,15 +188,15 @@ export function UserDirectoryPanel({
       </div>
 
       {activeControl === 'explorer' && (
-        <div className="rounded-3xl border border-blue-500/20 bg-white p-5" shadow-sm>
+        <div className="rounded-3xl border border-blue-500/20 bg-slate-950/80 p-5">
           <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <h3 className="text-lg font-semibold text-slate-900">Поиск, фильтры и сортировка</h3>
-              <p className="text-sm text-slate-500">Все инструменты собраны в одном окне.</p>
+              <h3 className="text-lg font-semibold text-white">Поиск, фильтры и сортировка</h3>
+              <p className="text-sm text-slate-400">Все инструменты собраны в одном окне.</p>
             </div>
             <button
               onClick={clearAll}
-              className="rounded-2xl border border-slate-300 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+              className="rounded-2xl border border-slate-700 bg-slate-900 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-slate-800"
             >
               Сбросить параметры
             </button>
@@ -204,38 +204,38 @@ export function UserDirectoryPanel({
 
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <label className="space-y-2 xl:col-span-4">
-              <span className="text-sm text-slate-500">Глобальный поиск</span>
+              <span className="text-sm text-slate-400">Глобальный поиск</span>
               <input
                 value={globalSearch}
                 onChange={(event) => setGlobalSearch(event.target.value)}
                 placeholder="ФИО, email, группа, кафедра, должность"
-                className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400"
+                className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400"
               />
             </label>
 
             <label className="space-y-2">
-              <span className="text-sm text-slate-500">ФИО</span>
-              <input value={fullNameFilter} onChange={(event) => setFullNameFilter(event.target.value)} className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400" />
+              <span className="text-sm text-slate-400">ФИО</span>
+              <input value={fullNameFilter} onChange={(event) => setFullNameFilter(event.target.value)} className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400" />
             </label>
             <label className="space-y-2">
-              <span className="text-sm text-slate-500">Email</span>
-              <input value={emailFilter} onChange={(event) => setEmailFilter(event.target.value)} className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400" />
+              <span className="text-sm text-slate-400">Email</span>
+              <input value={emailFilter} onChange={(event) => setEmailFilter(event.target.value)} className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400" />
             </label>
             <label className="space-y-2">
-              <span className="text-sm text-slate-500">Группа</span>
-              <input value={groupFilter} onChange={(event) => setGroupFilter(event.target.value)} className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400" />
+              <span className="text-sm text-slate-400">Группа</span>
+              <input value={groupFilter} onChange={(event) => setGroupFilter(event.target.value)} className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400" />
             </label>
             <label className="space-y-2">
-              <span className="text-sm text-slate-500">Кафедра</span>
-              <input value={departmentFilter} onChange={(event) => setDepartmentFilter(event.target.value)} className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400" />
+              <span className="text-sm text-slate-400">Кафедра</span>
+              <input value={departmentFilter} onChange={(event) => setDepartmentFilter(event.target.value)} className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400" />
             </label>
             <label className="space-y-2">
-              <span className="text-sm text-slate-500">Должность</span>
-              <input value={positionFilter} onChange={(event) => setPositionFilter(event.target.value)} className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400" />
+              <span className="text-sm text-slate-400">Должность</span>
+              <input value={positionFilter} onChange={(event) => setPositionFilter(event.target.value)} className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400" />
             </label>
             <label className="space-y-2">
-              <span className="text-sm text-slate-500">Роль</span>
-              <select value={roleFilter} onChange={(event) => setRoleFilter(event.target.value)} className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400">
+              <span className="text-sm text-slate-400">Роль</span>
+              <select value={roleFilter} onChange={(event) => setRoleFilter(event.target.value)} className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400">
                 <option value="all">Все роли</option>
                 <option value="admin">Администратор</option>
                 <option value="teacher">Преподаватель</option>
@@ -243,8 +243,8 @@ export function UserDirectoryPanel({
               </select>
             </label>
             <label className="space-y-2">
-              <span className="text-sm text-slate-500">Статус</span>
-              <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400">
+              <span className="text-sm text-slate-400">Статус</span>
+              <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400">
                 <option value="all">Все статусы</option>
                 <option value="active">Активен</option>
                 <option value="inactive">Не активен</option>
@@ -253,8 +253,8 @@ export function UserDirectoryPanel({
               </select>
             </label>
             <label className="space-y-2">
-              <span className="text-sm text-slate-500">Курс</span>
-              <select value={courseFilter} onChange={(event) => setCourseFilter(event.target.value)} className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400">
+              <span className="text-sm text-slate-400">Курс</span>
+              <select value={courseFilter} onChange={(event) => setCourseFilter(event.target.value)} className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400">
                 <option value="all">Все курсы</option>
                 <option value="1">1</option>
                 <option value="2">2</option>
@@ -263,8 +263,8 @@ export function UserDirectoryPanel({
               </select>
             </label>
             <label className="space-y-2">
-              <span className="text-sm text-slate-500">Сортировать по</span>
-              <select value={sortKey} onChange={(event) => setSortKey(event.target.value as SortKey)} className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400">
+              <span className="text-sm text-slate-400">Сортировать по</span>
+              <select value={sortKey} onChange={(event) => setSortKey(event.target.value as SortKey)} className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400">
                 <option value="fullName">ФИО</option>
                 <option value="email">Email</option>
                 <option value="role">Роль</option>
@@ -276,8 +276,8 @@ export function UserDirectoryPanel({
               </select>
             </label>
             <label className="space-y-2">
-              <span className="text-sm text-slate-500">Направление сортировки</span>
-              <select value={sortDirection} onChange={(event) => setSortDirection(event.target.value as 'asc' | 'desc')} className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400">
+              <span className="text-sm text-slate-400">Направление сортировки</span>
+              <select value={sortDirection} onChange={(event) => setSortDirection(event.target.value as 'asc' | 'desc')} className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400">
                 <option value="asc">По возрастанию</option>
                 <option value="desc">По убыванию</option>
               </select>
@@ -286,13 +286,13 @@ export function UserDirectoryPanel({
         </div>
       )}
 
-      {directoryQuery.isLoading && <p className="text-slate-500">Загрузка пользователей...</p>}
+      {directoryQuery.isLoading && <p className="text-slate-400">Загрузка пользователей...</p>}
 
       {!directoryQuery.isLoading && (
-        <div className={`rounded-3xl border border-slate-200 bg-white ${wideManagement ? 'p-5' : 'p-4'}`}>
+        <div className={`rounded-3xl border border-slate-800 bg-slate-950/70 ${wideManagement ? 'p-5' : 'p-4'}`}>
           <div className="overflow-x-auto">
-            <table className="text-left text-sm text-slate-700 min-w-[1700px] min-w-[2200px] table-auto w-max min-w-[2600px]">
-              <thead className="bg-slate-50 text-slate-500">
+            <table className="text-left text-sm text-slate-300 min-w-[1700px] min-w-[2200px] table-auto w-max min-w-[2600px]">
+              <thead className="bg-slate-900 text-slate-400">
                 <tr>
                   <th className="px-4 py-3 font-medium whitespace-nowrap align-top">Логин</th>
                   <th className="px-4 py-3 font-medium whitespace-nowrap align-top">ФИО</th>
@@ -320,9 +320,9 @@ export function UserDirectoryPanel({
                   </tr>
                 )}
                 {filteredUsers.map((user) => (
-                  <tr key={user.userId} className="border-t border-slate-200 align-top">
+                  <tr key={user.userId} className="border-t border-slate-800 align-top">
                     <td className="px-4 py-3 whitespace-nowrap align-top">{user.username}</td>
-                    <td className="px-4 py-3 font-medium text-slate-900 whitespace-nowrap align-top">{user.fullName}</td>
+                    <td className="px-4 py-3 font-medium text-white whitespace-nowrap align-top">{user.fullName}</td>
                     <td className="px-4 py-3 whitespace-nowrap align-top">{user.email || '—'}</td>
                     <td className="px-4 py-3 whitespace-nowrap align-top">{roleLabel(user.role)}</td>
                     <td className="px-4 py-3 whitespace-nowrap align-top">{yesNo(user.active)}</td>
@@ -339,7 +339,7 @@ export function UserDirectoryPanel({
                       <td className="px-4 py-3 whitespace-nowrap align-top">
                         <button
                           onClick={() => onEdit?.(user)}
-                          className="rounded-2xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                          className="rounded-2xl border border-slate-700 bg-slate-900 px-3 py-2 text-sm font-medium text-slate-200 hover:bg-slate-800"
                         >
                           Редактировать
                         </button>

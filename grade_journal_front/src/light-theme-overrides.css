@@ -1,0 +1,200 @@
+/* ===== LIGHT THEME OVERRIDES START ===== */
+
+body.light-theme {
+  background: linear-gradient(180deg, #f8fbff 0%, #f3f6fb 100%) !important;
+  color: #0f172a !important;
+}
+
+body.light-theme,
+body.light-theme #root {
+  min-height: 100vh;
+}
+
+body.light-theme #root {
+  background: transparent !important;
+}
+
+/* Базовые панели и карточки */
+body.light-theme section,
+body.light-theme .directory-panel-shell > *,
+body.light-theme .schedule-panel-shell > *,
+body.light-theme [class*="rounded-3xl"][class*="border"],
+body.light-theme [class*="rounded-2xl"][class*="border"] {
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06) !important;
+}
+
+/* Светлый фон вместо темного */
+body.light-theme [class*="bg-slate-950"],
+body.light-theme [class*="bg-slate-900"],
+body.light-theme [class*="bg-slate-800"],
+body.light-theme [class*="bg-slate-700"] {
+  background-color: #ffffff !important;
+}
+
+body.light-theme [class*="bg-slate-50"] {
+  background-color: #f8fafc !important;
+}
+
+body.light-theme [class*="border-slate-900"],
+body.light-theme [class*="border-slate-800"],
+body.light-theme [class*="border-slate-700"],
+body.light-theme [class*="border-slate-600"] {
+  border-color: #e2e8f0 !important;
+}
+
+/* Оверлеи модалок отдельно */
+body.light-theme [class*="fixed"][class*="bg-slate-950/"],
+body.light-theme [class*="fixed"][class*="bg-black/"] {
+  background-color: rgba(15, 23, 42, 0.20) !important;
+}
+
+/* Текст */
+body.light-theme [class*="text-white"] {
+  color: #0f172a !important;
+}
+
+body.light-theme [class*="text-slate-100"],
+body.light-theme [class*="text-slate-200"] {
+  color: #1e293b !important;
+}
+
+body.light-theme [class*="text-slate-300"] {
+  color: #334155 !important;
+}
+
+body.light-theme [class*="text-slate-400"] {
+  color: #64748b !important;
+}
+
+body.light-theme h1,
+body.light-theme h2,
+body.light-theme h3,
+body.light-theme h4,
+body.light-theme h5,
+body.light-theme h6 {
+  color: #0f172a !important;
+}
+
+/* Формы */
+body.light-theme input,
+body.light-theme select,
+body.light-theme textarea {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid #cbd5e1 !important;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+}
+
+body.light-theme input::placeholder,
+body.light-theme textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+body.light-theme input:focus,
+body.light-theme select:focus,
+body.light-theme textarea:focus {
+  outline: none !important;
+  border-color: #60a5fa !important;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.18) !important;
+}
+
+/* Подписи полей */
+body.light-theme label,
+body.light-theme span,
+body.light-theme p {
+  color: inherit;
+}
+
+/* Таблицы */
+body.light-theme table {
+  background: #ffffff !important;
+  color: #1e293b !important;
+}
+
+body.light-theme thead,
+body.light-theme thead tr {
+  background: #f8fafc !important;
+}
+
+body.light-theme tbody tr {
+  border-color: #e2e8f0 !important;
+}
+
+body.light-theme tbody tr:hover {
+  background: #f8fafc !important;
+}
+
+body.light-theme th {
+  color: #475569 !important;
+}
+
+body.light-theme td {
+  color: #1e293b !important;
+}
+
+/* Темные обычные кнопки превращаем в светлые */
+body.light-theme button[class*="bg-slate-"],
+body.light-theme a[class*="bg-slate-"] {
+  background: #f8fafc !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+body.light-theme button[class*="bg-slate-"]:hover,
+body.light-theme a[class*="bg-slate-"]:hover {
+  background: #eef2f7 !important;
+}
+
+/* Цветные кнопки оставляем цветными */
+body.light-theme button[class*="bg-blue-"],
+body.light-theme a[class*="bg-blue-"],
+body.light-theme button[class*="bg-emerald-"],
+body.light-theme a[class*="bg-emerald-"],
+body.light-theme button[class*="bg-rose-"],
+body.light-theme a[class*="bg-rose-"] {
+  color: #ffffff !important;
+}
+
+/* Синие активные карточки-кнопки */
+body.light-theme [class*="bg-blue-500"] {
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.18) !important;
+}
+
+/* Тени вместо темных */
+body.light-theme [class*="shadow-black"] {
+  box-shadow: 0 12px 34px rgba(15, 23, 42, 0.10) !important;
+}
+
+/* Немного приятнее скроллы */
+body.light-theme *::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+}
+
+body.light-theme *::-webkit-scrollbar-track {
+  background: #e2e8f0;
+  border-radius: 999px;
+}
+
+body.light-theme *::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 999px;
+}
+
+body.light-theme *::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* На случай белого текста внутри белых карточек */
+body.light-theme .rounded-3xl,
+body.light-theme .rounded-2xl {
+  color: #1e293b !important;
+}
+
+/* Главные страницы и блоки чуть мягче */
+body.light-theme .space-y-6 > section:first-child {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%) !important;
+}
+
+/* ===== LIGHT THEME OVERRIDES END ===== */

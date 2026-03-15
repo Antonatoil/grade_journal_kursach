@@ -65,24 +65,24 @@ export function ExportPanel({ title, description }: Props) {
   const selectedCount = Object.values(payload).filter(Boolean).length;
 
   return (
-    <section className="space-y-5 rounded-3xl border border-slate-200 bg-white p-6" shadow-sm>
+    <section className="space-y-5 rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
       <div>
-        <h2 className="text-2xl font-semibold text-slate-900">{title}</h2>
-        <p className="mt-2 max-w-4xl text-slate-500">{description}</p>
+        <h2 className="text-2xl font-semibold text-white">{title}</h2>
+        <p className="mt-2 max-w-4xl text-slate-400">{description}</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {checkboxItems.map((item) => (
-          <label key={item.key} className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-4">
+          <label key={item.key} className="flex items-start gap-3 rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-4">
             <input
               type="checkbox"
               checked={payload[item.key]}
               onChange={(event) => setPayload((prev) => ({ ...prev, [item.key]: event.target.checked }))}
-              className="mt-1 h-4 w-4 rounded border-slate-300 bg-slate-50 text-blue-500"
+              className="mt-1 h-4 w-4 rounded border-slate-600 bg-slate-900 text-blue-500"
             />
             <div>
               <div className="font-medium text-white">{item.label}</div>
-              <div className="mt-1 text-sm text-slate-500">{item.hint}</div>
+              <div className="mt-1 text-sm text-slate-400">{item.hint}</div>
             </div>
           </label>
         ))}
@@ -96,7 +96,7 @@ export function ExportPanel({ title, description }: Props) {
         >
           {exportMutation.isPending ? 'Формирование Excel…' : 'Сформировать Excel-отчет'}
         </button>
-        <div className="text-sm text-slate-500">Выбрано разделов: {selectedCount}</div>
+        <div className="text-sm text-slate-400">Выбрано разделов: {selectedCount}</div>
       </div>
 
       {message && <div className="rounded-2xl border border-blue-500/30 bg-blue-500/10 px-4 py-3 text-blue-100">{message}</div>}

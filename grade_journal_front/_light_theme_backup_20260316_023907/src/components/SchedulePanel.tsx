@@ -143,11 +143,11 @@ export function SchedulePanel({ canManage, title, description }: Props) {
   };
 
   return (
-    <section className="space-y-6 rounded-3xl border border-slate-200 bg-white p-6 w-full max-w-none min-w-0 overflow-hidden" shadow-sm>
+    <section className="space-y-6 rounded-3xl border border-slate-800 bg-slate-900/70 p-6 w-full max-w-none min-w-0 overflow-hidden">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between min-w-0">
         <div>
-          <h2 className="text-2xl font-semibold text-slate-900">{title}</h2>
-          <p className="mt-2 max-w-4xl text-slate-500">{description}</p>
+          <h2 className="text-2xl font-semibold text-white">{title}</h2>
+          <p className="mt-2 max-w-4xl text-slate-400">{description}</p>
         </div>
         {canManage && (
           <button
@@ -170,13 +170,13 @@ export function SchedulePanel({ canManage, title, description }: Props) {
       )}
 
       <div className="grid gap-4 lg:grid-cols-[320px,1fr]">
-        <div className="rounded-3xl border border-slate-200 bg-white p-5" shadow-sm>
+        <div className="rounded-3xl border border-slate-800 bg-slate-950/80 p-5">
           <label className="space-y-2">
-            <span className="text-sm text-slate-500">Выберите группу</span>
+            <span className="text-sm text-slate-400">Выберите группу</span>
             <select
               value={selectedGroupId}
               onChange={(event) => handleGroupChange(event.target.value)}
-              className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-800 outline-none focus:border-blue-400"
+              className="w-full rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3 text-slate-100 outline-none focus:border-blue-400"
             >
               {(metaQuery.data?.groups ?? []).map((group) => (
                 <option key={group.groupId} value={group.groupId}>
@@ -187,7 +187,7 @@ export function SchedulePanel({ canManage, title, description }: Props) {
           </label>
 
           {selectedGroup && (
-            <div className="mt-4 space-y-2 rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-700">
+            <div className="mt-4 space-y-2 rounded-2xl border border-slate-800 bg-slate-900/80 p-4 text-sm text-slate-300">
               <p><span className="text-slate-500">Группа:</span> {selectedGroup.groupCode}</p>
               <p><span className="text-slate-500">Курс:</span> {selectedGroup.courseNo}</p>
               <p><span className="text-slate-500">Факультет:</span> {selectedGroup.facultyName}</p>
@@ -196,16 +196,16 @@ export function SchedulePanel({ canManage, title, description }: Props) {
           )}
         </div>
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-5" shadow-sm>
-          <h3 className="text-lg font-semibold text-slate-900">Таблица расписания</h3>
-          <p className="mt-1 text-sm text-slate-500">После выбора группы отображается расписание текущего семестра.</p>
+        <div className="rounded-3xl border border-slate-800 bg-slate-950/80 p-5">
+          <h3 className="text-lg font-semibold text-white">Таблица расписания</h3>
+          <p className="mt-1 text-sm text-slate-400">После выбора группы отображается расписание текущего семестра.</p>
 
           {scheduleQuery.isLoading ? (
-            <p className="mt-6 text-slate-500">Загрузка расписания...</p>
+            <p className="mt-6 text-slate-400">Загрузка расписания...</p>
           ) : (
-            <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200">
-              <table className="min-w-[1100px] table-auto text-left text-sm text-slate-700">
-                <thead className="bg-slate-50 text-slate-700">
+            <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-800">
+              <table className="min-w-[1100px] table-auto text-left text-sm text-slate-200">
+                <thead className="bg-slate-900 text-slate-300">
                   <tr>
                     <th className="px-3 py-3 whitespace-nowrap align-top">Дата</th>
                     <th className="px-3 py-3 whitespace-nowrap align-top">Время</th>
@@ -219,16 +219,16 @@ export function SchedulePanel({ canManage, title, description }: Props) {
                 <tbody>
                   {(scheduleQuery.data ?? []).length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="px-4 py-10 text-center text-slate-500">
+                      <td colSpan={7} className="px-4 py-10 text-center text-slate-400">
                         Для выбранной группы пока нет записей в расписании.
                       </td>
                     </tr>
                   ) : (
                     (scheduleQuery.data ?? []).map((entry) => (
-                      <tr key={entry.scheduleId} className="border-t border-slate-200 align-top hover:bg-white">
+                      <tr key={entry.scheduleId} className="border-t border-slate-800 align-top hover:bg-slate-900/70">
                         <td className="px-3 py-4 whitespace-nowrap align-top">{formatLocalDate(entry.lessonDate)}</td>
                         <td className="px-3 py-4 whitespace-nowrap align-top">{entry.timeSlot}</td>
-                        <td className="px-3 py-4 font-medium text-slate-900 whitespace-nowrap align-top">{entry.courseName}</td>
+                        <td className="px-3 py-4 font-medium text-white whitespace-nowrap align-top">{entry.courseName}</td>
                         <td className="px-3 py-4 whitespace-nowrap align-top">{entry.teacherFullName}</td>
                         <td className="px-3 py-4 whitespace-nowrap align-top">{entry.room || '—'}</td>
                         <td className="px-3 py-4 whitespace-nowrap align-top">{lessonTypeLabel[entry.lessonType] || entry.lessonType}</td>
@@ -244,24 +244,24 @@ export function SchedulePanel({ canManage, title, description }: Props) {
       </div>
 
       {canManage && showCreateForm && (
-        <div className="rounded-3xl border border-emerald-500/20 bg-white p-6" shadow-sm>
+        <div className="rounded-3xl border border-emerald-500/20 bg-slate-950/80 p-6">
           <div className="mb-4">
-            <h3 className="text-lg font-semibold text-slate-900">Добавление записи в расписание</h3>
-            <p className="mt-1 text-sm text-slate-500">
+            <h3 className="text-lg font-semibold text-white">Добавление записи в расписание</h3>
+            <p className="mt-1 text-sm text-slate-400">
               Администратор может добавить новую пару. Проверки на прошлую дату, пересечение времени у группы и занятость преподавателя выполняются на сервере.
             </p>
           </div>
 
           <form onSubmit={submitSchedule} className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <label className="space-y-2">
-              <span className="text-sm text-slate-500">Группа</span>
+              <span className="text-sm text-slate-400">Группа</span>
               <select
                 value={form.groupId}
                 onChange={(event) => {
                   handleGroupChange(event.target.value);
                   setForm((prev) => ({ ...prev, groupId: event.target.value, courseId: '' }));
                 }}
-                className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-800 outline-none focus:border-emerald-400"
+                className="w-full rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3 text-slate-100 outline-none focus:border-emerald-400"
                 required
               >
                 <option value="">Выберите группу</option>
@@ -274,23 +274,23 @@ export function SchedulePanel({ canManage, title, description }: Props) {
             </label>
 
             <label className="space-y-2">
-              <span className="text-sm text-slate-500">Дата</span>
+              <span className="text-sm text-slate-400">Дата</span>
               <input
                 type="date"
                 min={todayString}
                 value={form.lessonDate}
                 onChange={(event) => setForm((prev) => ({ ...prev, lessonDate: event.target.value }))}
-                className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-800 outline-none focus:border-emerald-400"
+                className="w-full rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3 text-slate-100 outline-none focus:border-emerald-400"
                 required
               />
             </label>
 
             <label className="space-y-2">
-              <span className="text-sm text-slate-500">Время пары</span>
+              <span className="text-sm text-slate-400">Время пары</span>
               <select
                 value={form.timeSlot}
                 onChange={(event) => setForm((prev) => ({ ...prev, timeSlot: event.target.value }))}
-                className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-800 outline-none focus:border-emerald-400"
+                className="w-full rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3 text-slate-100 outline-none focus:border-emerald-400"
                 required
               >
                 <option value="">Выберите время</option>
@@ -301,11 +301,11 @@ export function SchedulePanel({ canManage, title, description }: Props) {
             </label>
 
             <label className="space-y-2">
-              <span className="text-sm text-slate-500">Тип занятия</span>
+              <span className="text-sm text-slate-400">Тип занятия</span>
               <select
                 value={form.lessonType}
                 onChange={(event) => setForm((prev) => ({ ...prev, lessonType: event.target.value }))}
-                className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-800 outline-none focus:border-emerald-400"
+                className="w-full rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3 text-slate-100 outline-none focus:border-emerald-400"
                 required
               >
                 {(metaQuery.data?.lessonTypes ?? []).map((type) => (
@@ -315,11 +315,11 @@ export function SchedulePanel({ canManage, title, description }: Props) {
             </label>
 
             <label className="space-y-2 xl:col-span-2">
-              <span className="text-sm text-slate-500">Дисциплина</span>
+              <span className="text-sm text-slate-400">Дисциплина</span>
               <select
                 value={form.courseId}
                 onChange={(event) => setForm((prev) => ({ ...prev, courseId: event.target.value }))}
-                className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-800 outline-none focus:border-emerald-400"
+                className="w-full rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3 text-slate-100 outline-none focus:border-emerald-400"
                 required
               >
                 <option value="">Выберите дисциплину</option>
@@ -332,11 +332,11 @@ export function SchedulePanel({ canManage, title, description }: Props) {
             </label>
 
             <label className="space-y-2 xl:col-span-2">
-              <span className="text-sm text-slate-500">Преподаватель</span>
+              <span className="text-sm text-slate-400">Преподаватель</span>
               <select
                 value={form.teacherId}
                 onChange={(event) => setForm((prev) => ({ ...prev, teacherId: event.target.value }))}
-                className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-800 outline-none focus:border-emerald-400"
+                className="w-full rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3 text-slate-100 outline-none focus:border-emerald-400"
                 required
               >
                 <option value="">Выберите преподавателя</option>
@@ -349,21 +349,21 @@ export function SchedulePanel({ canManage, title, description }: Props) {
             </label>
 
             <label className="space-y-2">
-              <span className="text-sm text-slate-500">Аудитория</span>
+              <span className="text-sm text-slate-400">Аудитория</span>
               <input
                 value={form.room}
                 onChange={(event) => setForm((prev) => ({ ...prev, room: event.target.value }))}
-                className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-800 outline-none focus:border-emerald-400"
+                className="w-full rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3 text-slate-100 outline-none focus:border-emerald-400"
                 placeholder="Например: А-301"
               />
             </label>
 
             <label className="space-y-2 xl:col-span-3">
-              <span className="text-sm text-slate-500">Тема</span>
+              <span className="text-sm text-slate-400">Тема</span>
               <input
                 value={form.topic}
                 onChange={(event) => setForm((prev) => ({ ...prev, topic: event.target.value }))}
-                className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-800 outline-none focus:border-emerald-400"
+                className="w-full rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3 text-slate-100 outline-none focus:border-emerald-400"
                 placeholder="Например: Введение в тему занятия"
               />
             </label>
@@ -379,7 +379,7 @@ export function SchedulePanel({ canManage, title, description }: Props) {
               <button
                 type="button"
                 onClick={() => setShowCreateForm(false)}
-                className="rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 font-medium text-slate-700 transition hover:bg-slate-100"
+                className="rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3 font-medium text-slate-200 transition hover:bg-slate-800"
               >
                 Отмена
               </button>

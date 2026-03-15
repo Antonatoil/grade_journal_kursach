@@ -321,18 +321,18 @@ export function AdminPage() {
 
   return (
     <div className="w-full max-w-none min-w-0 space-y-6">
-      <section className="w-full max-w-none min-w-0 rounded-3xl border border-slate-200 bg-white p-8" shadow-sm>
+      <section className="w-full max-w-none min-w-0 rounded-3xl border border-slate-800 bg-slate-900/70 p-8">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Главная панель администратора</h1>
-            <p className="mt-2 max-w-4xl text-slate-500">
+            <h1 className="text-3xl font-bold text-white">Главная панель администратора</h1>
+            <p className="mt-2 max-w-4xl text-slate-400">
               Здесь собраны основные разделы управления электронным журналом: заявки,
               профили, аккаунты, расписание, успеваемость и просмотр данных студентов.
             </p>
           </div>
           <button
             onClick={() => setActivePanel('home')}
-            className="rounded-2xl border border-slate-300 bg-white px-4 py-3 font-medium text-slate-700 hover:bg-slate-100"
+            className="rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 font-medium text-slate-200 hover:bg-slate-800"
           >
             На главную панель
           </button>
@@ -346,7 +346,7 @@ export function AdminPage() {
               className={`rounded-2xl px-5 py-4 text-left transition ${
                 activePanel === button.key
                   ? 'bg-blue-500 text-white'
-                  : 'bg-white text-slate-700 hover:bg-slate-100'
+                  : 'bg-slate-950 text-slate-200 hover:bg-slate-800'
               }`}
             >
               <div className="text-sm opacity-80">{button.subtitle}</div>
@@ -363,9 +363,9 @@ export function AdminPage() {
       )}
 
       {activePanel === 'home' && (
-        <section className="w-full max-w-none min-w-0 rounded-3xl border border-slate-200 bg-white p-6 text-slate-700" shadow-sm>
-          <h2 className="text-2xl font-semibold text-slate-900">Рабочее пространство администратора</h2>
-          <p className="mt-2 text-slate-500">
+        <section className="w-full max-w-none min-w-0 rounded-3xl border border-slate-800 bg-slate-900/70 p-6 text-slate-300">
+          <h2 className="text-2xl font-semibold text-white">Рабочее пространство администратора</h2>
+          <p className="mt-2 text-slate-400">
             Выберите нужный раздел с помощью кнопок выше. Администратор может обрабатывать
             заявки, заполнять профили, управлять аккаунтами, вести расписание и просматривать
             успеваемость.
@@ -374,18 +374,18 @@ export function AdminPage() {
       )}
 
       {activePanel === 'requests' && (
-        <section className="space-y-5 rounded-3xl border border-slate-200 bg-white p-6" shadow-sm>
+        <section className="space-y-5 rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
           <div>
-            <h2 className="text-2xl font-semibold text-slate-900">Одобрение заявок</h2>
-            <p className="mt-2 text-slate-500">
+            <h2 className="text-2xl font-semibold text-white">Одобрение заявок</h2>
+            <p className="mt-2 text-slate-400">
               Здесь отображаются заявки на регистрацию. Администратор может одобрить или
               отклонить каждую заявку.
             </p>
           </div>
 
-          <div className="overflow-x-auto rounded-3xl border border-slate-200 bg-white">
-            <table className="min-w-full text-left text-sm text-slate-700">
-              <thead className="bg-slate-50 text-slate-500">
+          <div className="overflow-x-auto rounded-3xl border border-slate-800 bg-slate-950/70">
+            <table className="min-w-full text-left text-sm text-slate-300">
+              <thead className="bg-slate-900 text-slate-400">
                 <tr>
                   <th className="px-4 py-3 font-medium">Логин</th>
                   <th className="px-4 py-3 font-medium">ФИО</th>
@@ -398,9 +398,9 @@ export function AdminPage() {
               </thead>
               <tbody>
                 {(requestsQuery.data ?? []).map((request) => (
-                  <tr key={request.requestId} className="border-t border-slate-200">
+                  <tr key={request.requestId} className="border-t border-slate-800">
                     <td className="px-4 py-3">{request.username}</td>
-                    <td className="px-4 py-3 font-medium text-slate-900">{request.fullName}</td>
+                    <td className="px-4 py-3 font-medium text-white">{request.fullName}</td>
                     <td className="px-4 py-3">{request.email || '—'}</td>
                     <td className="px-4 py-3">{roleLabel(request.desiredRole)}</td>
                     <td className="px-4 py-3">{request.status}</td>
@@ -434,8 +434,8 @@ export function AdminPage() {
                   </tr>
                 ))}
                 {!requestsQuery.data?.length && (
-                  <tr className="border-t border-slate-200">
-                    <td colSpan={7} className="px-4 py-6 text-center text-slate-500">
+                  <tr className="border-t border-slate-800">
+                    <td colSpan={7} className="px-4 py-6 text-center text-slate-400">
                       Заявок нет.
                     </td>
                   </tr>
@@ -447,18 +447,18 @@ export function AdminPage() {
       )}
 
       {activePanel === 'profiles' && (
-        <section className="space-y-5 rounded-3xl border border-slate-200 bg-white p-6" shadow-sm>
+        <section className="space-y-5 rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
           <div>
-            <h2 className="text-2xl font-semibold text-slate-900">Заполнение профилей</h2>
-            <p className="mt-2 text-slate-500">
+            <h2 className="text-2xl font-semibold text-white">Заполнение профилей</h2>
+            <p className="mt-2 text-slate-400">
               Здесь отображаются одобренные пользователи, для которых ещё не заполнен профиль
               студента или преподавателя.
             </p>
           </div>
 
-          <div className="overflow-x-auto rounded-3xl border border-slate-200 bg-white">
-            <table className="min-w-full text-left text-sm text-slate-700">
-              <thead className="bg-slate-50 text-slate-500">
+          <div className="overflow-x-auto rounded-3xl border border-slate-800 bg-slate-950/70">
+            <table className="min-w-full text-left text-sm text-slate-300">
+              <thead className="bg-slate-900 text-slate-400">
                 <tr>
                   <th className="px-4 py-3 font-medium">Логин</th>
                   <th className="px-4 py-3 font-medium">ФИО</th>
@@ -471,9 +471,9 @@ export function AdminPage() {
               </thead>
               <tbody>
                 {(incompleteProfilesQuery.data ?? []).map((user) => (
-                  <tr key={user.userId} className="border-t border-slate-200">
+                  <tr key={user.userId} className="border-t border-slate-800">
                     <td className="px-4 py-3">{user.username}</td>
-                    <td className="px-4 py-3 font-medium text-slate-900">{user.fullName}</td>
+                    <td className="px-4 py-3 font-medium text-white">{user.fullName}</td>
                     <td className="px-4 py-3">{user.email || '—'}</td>
                     <td className="px-4 py-3">{roleLabel(user.role)}</td>
                     <td className="px-4 py-3">{yesNoLabel(user.approved)}</td>
@@ -490,7 +490,7 @@ export function AdminPage() {
                             phone: ''
                           });
                         }}
-                        className="rounded-2xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                        className="rounded-2xl border border-slate-700 bg-slate-900 px-3 py-2 text-sm font-medium text-slate-200 hover:bg-slate-800"
                       >
                         Заполнить
                       </button>
@@ -498,8 +498,8 @@ export function AdminPage() {
                   </tr>
                 ))}
                 {!incompleteProfilesQuery.data?.length && (
-                  <tr className="border-t border-slate-200">
-                    <td colSpan={7} className="px-4 py-6 text-center text-slate-500">
+                  <tr className="border-t border-slate-800">
+                    <td colSpan={7} className="px-4 py-6 text-center text-slate-400">
                       Пользователей без профиля нет.
                     </td>
                   </tr>
@@ -600,20 +600,20 @@ export function AdminPage() {
         />
       )}
       {profileTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/25 p-4">
-          <div className="w-full max-w-2xl rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-2xl shadow-slate-200/70">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 p-4">
+          <div className="w-full max-w-2xl rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-2xl shadow-black/40">
             <div className="mb-5 flex items-start justify-between gap-4">
               <div>
-                <h3 className="text-lg font-semibold text-slate-900">
+                <h3 className="text-lg font-semibold text-white">
                   Заполнение профиля: {profileTarget.fullName}
                 </h3>
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="mt-1 text-sm text-slate-400">
                   Роль: {roleLabel(profileTarget.role)}
                 </p>
               </div>
               <button
                 onClick={() => setProfileTarget(null)}
-                className="rounded-2xl border border-slate-300 bg-white px-4 py-2 text-slate-700 hover:bg-slate-100"
+                className="rounded-2xl border border-slate-700 bg-slate-950 px-4 py-2 text-slate-200 hover:bg-slate-800"
               >
                 Закрыть
               </button>
@@ -622,13 +622,13 @@ export function AdminPage() {
             {profileTarget.role === 'student' ? (
               <div className="grid gap-4 md:grid-cols-2">
                 <label className="space-y-2">
-                  <span className="text-sm text-slate-500">Группа</span>
+                  <span className="text-sm text-slate-400">Группа</span>
                   <select
                     value={profileForm.groupId}
                     onChange={(event) =>
                       setProfileForm((prev) => ({ ...prev, groupId: event.target.value }))
                     }
-                    className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400"
+                    className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400"
                   >
                     <option value="">Выберите группу</option>
                     {(optionsQuery.data?.groups ?? []).map((group) => (
@@ -640,7 +640,7 @@ export function AdminPage() {
                 </label>
 
                 <label className="space-y-2">
-                  <span className="text-sm text-slate-500">Студенческий билет</span>
+                  <span className="text-sm text-slate-400">Студенческий билет</span>
                   <input
                     value={profileForm.studentCard}
                     onChange={(event) =>
@@ -649,14 +649,14 @@ export function AdminPage() {
                         studentCard: event.target.value
                       }))
                     }
-                    className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400"
+                    className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400"
                   />
                 </label>
               </div>
             ) : (
               <div className="grid gap-4 md:grid-cols-2">
                 <label className="space-y-2">
-                  <span className="text-sm text-slate-500">Кафедра</span>
+                  <span className="text-sm text-slate-400">Кафедра</span>
                   <select
                     value={profileForm.departmentId}
                     onChange={(event) =>
@@ -665,7 +665,7 @@ export function AdminPage() {
                         departmentId: event.target.value
                       }))
                     }
-                    className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400"
+                    className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400"
                   >
                     <option value="">Выберите кафедру</option>
                     {(optionsQuery.data?.departments ?? []).map((department) => (
@@ -677,24 +677,24 @@ export function AdminPage() {
                 </label>
 
                 <label className="space-y-2">
-                  <span className="text-sm text-slate-500">Должность</span>
+                  <span className="text-sm text-slate-400">Должность</span>
                   <input
                     value={profileForm.position}
                     onChange={(event) =>
                       setProfileForm((prev) => ({ ...prev, position: event.target.value }))
                     }
-                    className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400"
+                    className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400"
                   />
                 </label>
 
                 <label className="space-y-2 md:col-span-2">
-                  <span className="text-sm text-slate-500">Телефон</span>
+                  <span className="text-sm text-slate-400">Телефон</span>
                   <input
                     value={profileForm.phone}
                     onChange={(event) =>
                       setProfileForm((prev) => ({ ...prev, phone: event.target.value }))
                     }
-                    className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400"
+                    className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400"
                   />
                 </label>
               </div>
@@ -709,7 +709,7 @@ export function AdminPage() {
               </button>
               <button
                 onClick={() => setProfileTarget(null)}
-                className="rounded-2xl border border-slate-300 bg-white px-4 py-3 font-medium text-slate-700 hover:bg-slate-100"
+                className="rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 font-medium text-slate-200 hover:bg-slate-800"
               >
                 Отмена
               </button>
@@ -719,20 +719,20 @@ export function AdminPage() {
       )}
 
       {upsertMode && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/25 p-4">
-          <div className="max-h-[92vh] w-full max-w-[1920px] overflow-y-auto rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-2xl shadow-slate-200/70">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 p-4">
+          <div className="max-h-[92vh] w-full max-w-[1920px] overflow-y-auto rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-2xl shadow-black/40">
             <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
               <div>
-                <h2 className="text-2xl font-semibold text-slate-900">
+                <h2 className="text-2xl font-semibold text-white">
                   {upsertMode === 'create'
                     ? 'Создание пользователя'
                     : 'Редактирование пользователя'}
                 </h2>
-                <p className="mt-1 max-w-3xl text-slate-500">{selectedRoleDescription}</p>
+                <p className="mt-1 max-w-3xl text-slate-400">{selectedRoleDescription}</p>
               </div>
               <button
                 onClick={closeUpsert}
-                className="rounded-2xl border border-slate-300 bg-white px-4 py-3 font-medium text-slate-700 hover:bg-slate-100"
+                className="rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 font-medium text-slate-200 hover:bg-slate-800"
               >
                 Закрыть окно
               </button>
@@ -740,19 +740,19 @@ export function AdminPage() {
 
             <form onSubmit={submitUpsert} className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               <label className="space-y-2">
-                <span className="text-sm text-slate-500">Логин</span>
+                <span className="text-sm text-slate-400">Логин</span>
                 <input
                   value={upsertPayload.username}
                   onChange={(event) =>
                     setUpsertPayload((prev) => ({ ...prev, username: event.target.value }))
                   }
-                  className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400"
+                  className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400"
                   required
                 />
               </label>
 
               <label className="space-y-2">
-                <span className="text-sm text-slate-500">
+                <span className="text-sm text-slate-400">
                   Пароль {upsertMode === 'edit' ? '(оставьте пустым, если менять не нужно)' : ''}
                 </span>
                 <input
@@ -761,37 +761,37 @@ export function AdminPage() {
                   onChange={(event) =>
                     setUpsertPayload((prev) => ({ ...prev, password: event.target.value }))
                   }
-                  className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400"
+                  className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400"
                   required={upsertMode === 'create'}
                 />
               </label>
 
               <label className="space-y-2">
-                <span className="text-sm text-slate-500">ФИО</span>
+                <span className="text-sm text-slate-400">ФИО</span>
                 <input
                   value={upsertPayload.fullName}
                   onChange={(event) =>
                     setUpsertPayload((prev) => ({ ...prev, fullName: event.target.value }))
                   }
-                  className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400"
+                  className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400"
                   required
                 />
               </label>
 
               <label className="space-y-2 xl:col-span-2">
-                <span className="text-sm text-slate-500">Email</span>
+                <span className="text-sm text-slate-400">Email</span>
                 <input
                   type="email"
                   value={upsertPayload.email}
                   onChange={(event) =>
                     setUpsertPayload((prev) => ({ ...prev, email: event.target.value }))
                   }
-                  className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400"
+                  className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400"
                 />
               </label>
 
               <label className="space-y-2">
-                <span className="text-sm text-slate-500">Роль</span>
+                <span className="text-sm text-slate-400">Роль</span>
                 <select
                   value={upsertPayload.role}
                   onChange={(event) =>
@@ -806,7 +806,7 @@ export function AdminPage() {
                       phone: event.target.value === 'teacher' ? prev.phone : ''
                     }))
                   }
-                  className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400"
+                  className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400"
                 >
                   <option value="admin">Администратор</option>
                   <option value="teacher">Преподаватель</option>
@@ -815,7 +815,7 @@ export function AdminPage() {
               </label>
 
               <label className="space-y-2">
-                <span className="text-sm text-slate-500">Активен</span>
+                <span className="text-sm text-slate-400">Активен</span>
                 <select
                   value={String(upsertPayload.active)}
                   onChange={(event) =>
@@ -824,7 +824,7 @@ export function AdminPage() {
                       active: event.target.value === 'true'
                     }))
                   }
-                  className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400"
+                  className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400"
                 >
                   <option value="true">Да</option>
                   <option value="false">Нет</option>
@@ -832,7 +832,7 @@ export function AdminPage() {
               </label>
 
               <label className="space-y-2">
-                <span className="text-sm text-slate-500">Одобрен</span>
+                <span className="text-sm text-slate-400">Одобрен</span>
                 <select
                   value={String(upsertPayload.approved)}
                   onChange={(event) =>
@@ -841,7 +841,7 @@ export function AdminPage() {
                       approved: event.target.value === 'true'
                     }))
                   }
-                  className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400"
+                  className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400"
                 >
                   <option value="true">Да</option>
                   <option value="false">Нет</option>
@@ -851,13 +851,13 @@ export function AdminPage() {
               {upsertPayload.role === 'student' && (
                 <>
                   <label className="space-y-2">
-                    <span className="text-sm text-slate-500">Группа</span>
+                    <span className="text-sm text-slate-400">Группа</span>
                     <select
                       value={upsertPayload.groupId}
                       onChange={(event) =>
                         setUpsertPayload((prev) => ({ ...prev, groupId: event.target.value }))
                       }
-                      className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400"
+                      className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400"
                     >
                       <option value="">Выберите группу</option>
                       {(optionsQuery.data?.groups ?? []).map((group) => (
@@ -869,7 +869,7 @@ export function AdminPage() {
                   </label>
 
                   <label className="space-y-2">
-                    <span className="text-sm text-slate-500">Студенческий билет</span>
+                    <span className="text-sm text-slate-400">Студенческий билет</span>
                     <input
                       value={upsertPayload.studentCard}
                       onChange={(event) =>
@@ -878,7 +878,7 @@ export function AdminPage() {
                           studentCard: event.target.value
                         }))
                       }
-                      className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400"
+                      className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400"
                     />
                   </label>
                 </>
@@ -887,7 +887,7 @@ export function AdminPage() {
               {upsertPayload.role === 'teacher' && (
                 <>
                   <label className="space-y-2">
-                    <span className="text-sm text-slate-500">Кафедра</span>
+                    <span className="text-sm text-slate-400">Кафедра</span>
                     <select
                       value={upsertPayload.departmentId}
                       onChange={(event) =>
@@ -896,7 +896,7 @@ export function AdminPage() {
                           departmentId: event.target.value
                         }))
                       }
-                      className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400"
+                      className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400"
                     >
                       <option value="">Выберите кафедру</option>
                       {(optionsQuery.data?.departments ?? []).map((department) => (
@@ -908,24 +908,24 @@ export function AdminPage() {
                   </label>
 
                   <label className="space-y-2">
-                    <span className="text-sm text-slate-500">Должность</span>
+                    <span className="text-sm text-slate-400">Должность</span>
                     <input
                       value={upsertPayload.position}
                       onChange={(event) =>
                         setUpsertPayload((prev) => ({ ...prev, position: event.target.value }))
                       }
-                      className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400"
+                      className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400"
                     />
                   </label>
 
                   <label className="space-y-2 xl:col-span-2">
-                    <span className="text-sm text-slate-500">Телефон</span>
+                    <span className="text-sm text-slate-400">Телефон</span>
                     <input
                       value={upsertPayload.phone}
                       onChange={(event) =>
                         setUpsertPayload((prev) => ({ ...prev, phone: event.target.value }))
                       }
-                      className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400"
+                      className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400"
                     />
                   </label>
                 </>
@@ -946,7 +946,7 @@ export function AdminPage() {
                 <button
                   type="button"
                   onClick={closeUpsert}
-                  className="rounded-2xl border border-slate-300 bg-white px-4 py-3 font-medium text-slate-700 hover:bg-slate-100"
+                  className="rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 font-medium text-slate-200 hover:bg-slate-800"
                 >
                   Отмена
                 </button>

@@ -50,18 +50,18 @@ export function TeacherSchedulePanel({ title, description }: Props) {
   });
 
   return (
-    <section className="space-y-5 rounded-3xl border border-slate-200 bg-white p-6" shadow-sm>
+    <section className="space-y-5 rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
       <div>
-        <h2 className="text-2xl font-semibold text-slate-900">{title}</h2>
-        <p className="mt-2 text-slate-500">{description}</p>
+        <h2 className="text-2xl font-semibold text-white">{title}</h2>
+        <p className="mt-2 text-slate-400">{description}</p>
       </div>
 
       <label className="block space-y-2">
-        <span className="text-sm text-slate-500">Преподаватель</span>
+        <span className="text-sm text-slate-400">Преподаватель</span>
         <select
           value={teacherId}
           onChange={(event) => setTeacherId(event.target.value)}
-          className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400"
+          className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400"
         >
           <option value="">Выберите преподавателя</option>
           {(teachersQuery.data ?? []).map((teacher) => (
@@ -72,9 +72,9 @@ export function TeacherSchedulePanel({ title, description }: Props) {
         </select>
       </label>
 
-      <div className="overflow-x-auto rounded-3xl border border-slate-200 bg-white">
-        <table className="min-w-full text-left text-sm text-slate-700">
-          <thead className="bg-slate-50 text-slate-500">
+      <div className="overflow-x-auto rounded-3xl border border-slate-800 bg-slate-950/70">
+        <table className="min-w-full text-left text-sm text-slate-300">
+          <thead className="bg-slate-900 text-slate-400">
             <tr>
               <th className="px-4 py-3 font-medium">Дата</th>
               <th className="px-4 py-3 font-medium">Время</th>
@@ -87,10 +87,10 @@ export function TeacherSchedulePanel({ title, description }: Props) {
           </thead>
           <tbody>
             {(scheduleQuery.data ?? []).map((lesson, index) => (
-              <tr key={`${lesson.lessonDate}-${lesson.timeSlot}-${lesson.groupCode}-${index}`} className="border-t border-slate-200">
+              <tr key={`${lesson.lessonDate}-${lesson.timeSlot}-${lesson.groupCode}-${index}`} className="border-t border-slate-800">
                 <td className="px-4 py-3">{lesson.lessonDate}</td>
                 <td className="px-4 py-3">{lesson.timeSlot}</td>
-                <td className="px-4 py-3 font-medium text-slate-900">{lesson.courseName}</td>
+                <td className="px-4 py-3 font-medium text-white">{lesson.courseName}</td>
                 <td className="px-4 py-3">{lesson.groupCode}</td>
                 <td className="px-4 py-3">{lesson.room || '—'}</td>
                 <td className="px-4 py-3">{lesson.lessonType}</td>
@@ -98,8 +98,8 @@ export function TeacherSchedulePanel({ title, description }: Props) {
               </tr>
             ))}
             {teacherId && !scheduleQuery.data?.length && (
-              <tr className="border-t border-slate-200">
-                <td colSpan={7} className="px-4 py-6 text-center text-slate-500">
+              <tr className="border-t border-slate-800">
+                <td colSpan={7} className="px-4 py-6 text-center text-slate-400">
                   Для выбранного преподавателя пары не найдены.
                 </td>
               </tr>
