@@ -1,0 +1,24 @@
+export type AdminUser = {
+  userId: number;
+  username: string;
+  fullName: string;
+  email?: string | null;
+  role: 'admin' | 'teacher' | 'student';
+  active: boolean;
+  approved: boolean;
+  profileCompleted: boolean;
+  createdAt: string;
+  studentId?: number | null;
+  studentCard?: string | null;
+  groupId?: number | null;
+  groupCode?: string | null;
+  courseNo?: number | null;
+  facultyName?: string | null;
+  specializationName?: string | null;
+  teacherId?: number | null;
+  departmentId?: number | null;
+  departmentCode?: string | null;
+  departmentName?: string | null;
+  position?: string | null;
+  phone?: string | null;
+};
