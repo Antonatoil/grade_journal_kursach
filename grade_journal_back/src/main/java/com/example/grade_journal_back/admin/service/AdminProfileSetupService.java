@@ -23,6 +23,10 @@ import org.springframework.util.StringUtils;
 
 import java.util.List;
 
+import org.springframework.cache.annotation.CacheEvict;
+
+import org.springframework.cache.annotation.Cacheable;
+
 @Service
 @RequiredArgsConstructor
 public class AdminProfileSetupService {
@@ -50,6 +54,7 @@ public class AdminProfileSetupService {
             .toList();
     }
 
+    @Cacheable("adminProfileOptions")
     @Transactional(readOnly = true)
     public AdminProfileOptionsDto getOptions() {
         List<AdminProfileOptionsDto.GroupOptionDto> groups = studyGroupRepository.findAll()
@@ -76,6 +81,7 @@ public class AdminProfileSetupService {
         return new AdminProfileOptionsDto(groups, departments);
     }
 
+    @CacheEvict(value = "adminProfileOptions", allEntries = true)
     @Transactional
     public String fillStudentProfile(Integer userId, FillStudentProfileRequest request) {
         UserAccount user = userAccountRepository.findByUserAccountId(userId)
@@ -106,6 +112,7 @@ public class AdminProfileSetupService {
         return "Профиль студента успешно заполнен";
     }
 
+    @CacheEvict(value = "adminProfileOptions", allEntries = true)
     @Transactional
     public String fillTeacherProfile(Integer userId, FillTeacherProfileRequest request) {
         UserAccount user = userAccountRepository.findByUserAccountId(userId)

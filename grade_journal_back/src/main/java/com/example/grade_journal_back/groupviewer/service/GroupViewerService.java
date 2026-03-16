@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import org.springframework.cache.annotation.Cacheable;
+
 @Service
 public class GroupViewerService {
 
@@ -16,6 +18,7 @@ public class GroupViewerService {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    @Cacheable("groupViewerGroups")
     public List<GroupOptionResponse> getGroups() {
         return jdbcTemplate.query(
                 """

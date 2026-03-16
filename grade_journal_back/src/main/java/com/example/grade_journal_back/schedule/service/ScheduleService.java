@@ -12,6 +12,10 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.cache.annotation.CacheEvict;
+
+import org.springframework.cache.annotation.Cacheable;
+
 @Service
 @RequiredArgsConstructor
 public class ScheduleService {
@@ -41,6 +45,7 @@ public class ScheduleService {
 
     private final JdbcTemplate jdbcTemplate;
 
+    @Cacheable("scheduleMeta")
     public ScheduleMetaResponse getMeta() {
         List<ScheduleGroupOptionDto> groups = jdbcTemplate.query(
             """
@@ -138,6 +143,7 @@ public class ScheduleService {
         );
     }
 
+    @CacheEvict(value = "scheduleMeta", allEntries = true)
     @Transactional
     public String createSchedule(CreateScheduleRequest request) {
         CurrentTerm currentTerm = findCurrentTerm();
