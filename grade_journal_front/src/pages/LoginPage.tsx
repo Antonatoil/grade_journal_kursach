@@ -1,3 +1,4 @@
+import { GithubLoginButton } from '../components/GithubLoginButton';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
@@ -86,7 +87,10 @@ export function LoginPage() {
         >
           {mutation.isPending ? 'Выполняется вход...' : 'Войти'}
         </button>
-      </form>
+            <div className="mt-4">
+        <GithubLoginButton label="Войти через GitHub" />
+      </div>
+</form>
 
       <p className="mt-6 text-sm text-slate-500">
         Нет аккаунта?{' '}

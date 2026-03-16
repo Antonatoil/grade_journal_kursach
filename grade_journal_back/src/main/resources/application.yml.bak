@@ -27,8 +27,8 @@ spring:
       client:
         registration:
           github:
-            client-id: ${GITHUB_CLIENT_ID:Iv23li2yzcNdnIyZsQ2x}
-            client-secret: ${GITHUB_CLIENT_SECRET:c431b2ef6754e39773a96cf2f3ebd623ea7c161d}
+            client-id: ${GITHUB_CLIENT_ID:PUT_GITHUB_CLIENT_ID_HERE}
+            client-secret: ${GITHUB_CLIENT_SECRET:PUT_GITHUB_CLIENT_SECRET_HERE}
             scope:
               - read:user
               - user:email
@@ -46,7 +46,7 @@ springdoc:
 
 app:
   jwt:
-    secret: ${APP_JWT_SECRET:grade-journal-super-secret-key-2026-very-long-and-safe-123456789}
+    secret: ${GITHUB_CLIENT_SECRET:PUT_GITHUB_CLIENT_SECRET_HERE}
     access-expiration-minutes: 30
     refresh-expiration-days: 30
   oauth2:

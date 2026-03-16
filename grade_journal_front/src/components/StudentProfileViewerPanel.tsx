@@ -1,230 +1,457 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../lib/api';
-import type { StudentProfileOption, StudentProfileResponse } from '../types/studentProfile';
 
 type Props = {
   title: string;
   description: string;
 };
 
+type StudentOption = {
+  studentId: number;
+  fullName: string;
+  groupCode: string;
+};
+
+type CourseOption = {
+  courseId: number;
+  courseName: string;
+};
+
+type DetailPoint = {
+  orderNo: number;
+  value: number;
+  gradeType: string;
+  gradedAt: string;
+};
+
+type DetailResponse = {
+  studentName: string;
+  groupCode: string;
+  courseName: string;
+  averageAllCourses: number;
+  averageSelectedCourse: number;
+  predictedFinalGrade: number;
+  recommendationSummary: string;
+  recommendations: string[];
+  points: DetailPoint[];
+  gradeCount?: number;
+  attendanceRate?: number;
+  missedHours?: number;
+  lastThreeGrades?: string;
+  trend?: string;
+  modelVersion?: string;
+};
+
+function unwrapArray(value: any): any[] {
+  if (Array.isArray(value)) return value;
+  if (Array.isArray(value?.items)) return value.items;
+  if (Array.isArray(value?.content)) return value.content;
+  if (Array.isArray(value?.data)) return value.data;
+  return [];
+}
+
+async function fetchFirst(urls: string[]) {
+  let lastError: any = null;
+
+  for (const url of urls) {
+    try {
+      const response = await api.get(url);
+      return response.data;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw lastError ?? new Error('Не удалось загрузить данные.');
+}
+
+function normalizeStudents(raw: any): StudentOption[] {
+  return unwrapArray(raw)
+    .map((item: any) => ({
+      studentId: Number(item.studentId ?? item.id ?? item.student?.studentId ?? 0),
+      fullName: String(item.fullName ?? item.studentName ?? item.name ?? item.user?.fullName ?? ''),
+      groupCode: String(item.groupCode ?? item.group?.groupCode ?? item.groupName ?? '')
+    }))
+    .filter((item: StudentOption) => item.studentId > 0 && item.fullName.trim().length > 0)
+    .sort((a: StudentOption, b: StudentOption) => a.fullName.localeCompare(b.fullName, 'ru'));
+}
+
+function normalizeCourses(raw: any): CourseOption[] {
+  return unwrapArray(raw)
+    .map((item: any) => ({
+      courseId: Number(item.courseId ?? item.id ?? item.course?.courseId ?? 0),
+      courseName: String(item.courseName ?? item.name ?? item.title ?? item.course?.courseName ?? '')
+    }))
+    .filter((item: CourseOption) => item.courseId > 0 && item.courseName.trim().length > 0)
+    .sort((a: CourseOption, b: CourseOption) => a.courseName.localeCompare(b.courseName, 'ru'));
+}
+
+function normalizeDetails(raw: any): DetailResponse {
+  const pointsRaw = unwrapArray(raw?.points ?? raw?.grades ?? raw?.items);
+
+  return {
+    studentName: String(raw?.studentName ?? raw?.fullName ?? '—'),
+    groupCode: String(raw?.groupCode ?? '—'),
+    courseName: String(raw?.courseName ?? '—'),
+    averageAllCourses: Number(raw?.averageAllCourses ?? 0),
+    averageSelectedCourse: Number(raw?.averageSelectedCourse ?? raw?.averageGrade ?? 0),
+    predictedFinalGrade: Number(raw?.predictedFinalGrade ?? 0),
+    recommendationSummary: String(raw?.recommendationSummary ?? '—'),
+    recommendations: Array.isArray(raw?.recommendations) ? raw.recommendations.map(String) : [],
+    points: pointsRaw.map((point: any, index: number) => ({
+      orderNo: Number(point.orderNo ?? index + 1),
+      value: Number(point.value ?? point.gradeValue ?? point.grade ?? 0),
+      gradeType: String(point.gradeType ?? point.typeName ?? point.title ?? 'Оценка'),
+      gradedAt: String(point.gradedAt ?? point.date ?? point.dueDate ?? '')
+    })),
+    gradeCount: Number(raw?.gradeCount ?? pointsRaw.length ?? 0),
+    attendanceRate:
+      raw?.attendanceRate === null || raw?.attendanceRate === undefined
+        ? undefined
+        : Number(raw.attendanceRate),
+    missedHours:
+      raw?.missedHours === null || raw?.missedHours === undefined
+        ? undefined
+        : Number(raw.missedHours),
+    lastThreeGrades: raw?.lastThreeGrades ? String(raw.lastThreeGrades) : undefined,
+    trend: raw?.trend ? String(raw.trend) : undefined,
+    modelVersion: raw?.modelVersion ? String(raw.modelVersion) : undefined
+  };
+}
+
+function formatNumber(value: number | undefined) {
+  if (value === null || value === undefined || Number.isNaN(value)) {
+    return '—';
+  }
+  return String(value);
+}
+
 function formatDate(value: string) {
   if (!value) {
     return '—';
   }
-  const [year, month, day] = value.slice(0, 10).split('-');
-  return `${day}.${month}.${year}`;
-}
 
-function riskLabel(value: string) {
-  if (value === 'high') return 'Высокий';
-  if (value === 'medium') return 'Средний';
-  return 'Низкий';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return date.toLocaleString();
 }
 
 export function StudentProfileViewerPanel({ title, description }: Props) {
   const [search, setSearch] = useState('');
-  const [studentId, setStudentId] = useState('');
+  const [selectedStudentId, setSelectedStudentId] = useState<string>('');
+  const [selectedCourseId, setSelectedCourseId] = useState<string>('');
 
-  const optionsQuery = useQuery({
-    queryKey: ['student-profile-options', search],
-    queryFn: async () => {
-      const response = await api.get<StudentProfileOption[]>('/api/student-profiles/options', {
-        params: {
-          query: search
-        }
-      });
-      return response.data;
-    }
+  const studentsQuery = useQuery({
+    queryKey: ['student-profile-viewer', 'students'],
+    queryFn: async () =>
+      normalizeStudents(
+        await fetchFirst([
+          '/api/performance-panel/students',
+          '/api/student-profile/students',
+          '/api/students',
+          '/api/users/students'
+        ])
+      )
   });
 
   useEffect(() => {
-    const options = optionsQuery.data ?? [];
-    if (!options.length) {
-      setStudentId('');
-      return;
+    if (!selectedStudentId && studentsQuery.data?.length) {
+      setSelectedStudentId(String(studentsQuery.data[0].studentId));
     }
+  }, [selectedStudentId, studentsQuery.data]);
 
-    const exists = options.some((option) => String(option.studentId) === studentId);
-    if (!studentId || !exists) {
-      setStudentId(String(options[0].studentId));
-    }
-  }, [optionsQuery.data, studentId]);
+  useEffect(() => {
+    setSelectedCourseId('');
+  }, [selectedStudentId]);
 
-  const profileQuery = useQuery({
-    queryKey: ['student-profile', studentId],
-    enabled: Boolean(studentId),
-    queryFn: async () => {
-      const response = await api.get<StudentProfileResponse>(`/api/student-profiles/${studentId}`);
-      return response.data;
-    }
+  const coursesQuery = useQuery({
+    enabled: Boolean(selectedStudentId),
+    queryKey: ['student-profile-viewer', 'courses', selectedStudentId],
+    queryFn: async () =>
+      normalizeCourses(
+        await fetchFirst([
+          `/api/performance-panel/courses?studentId=${selectedStudentId}`,
+          `/api/performance/student-courses?studentId=${selectedStudentId}`,
+          `/api/student-profile/courses?studentId=${selectedStudentId}`,
+          `/api/courses?studentId=${selectedStudentId}`
+        ])
+      )
   });
 
-  const errorMessage =
-    (profileQuery.error as any)?.response?.data?.message ??
-    'Не удалось загрузить профиль студента.';
+  useEffect(() => {
+    if (!selectedCourseId && coursesQuery.data?.length) {
+      setSelectedCourseId(String(coursesQuery.data[0].courseId));
+    }
+  }, [selectedCourseId, coursesQuery.data]);
+
+  const filteredStudents = useMemo(() => {
+    const source = studentsQuery.data ?? [];
+    const query = search.trim().toLowerCase();
+
+    if (!query) {
+      return source;
+    }
+
+    return source.filter(
+      (student) =>
+        student.fullName.toLowerCase().includes(query) ||
+        student.groupCode.toLowerCase().includes(query) ||
+        String(student.studentId).includes(query)
+    );
+  }, [studentsQuery.data, search]);
+
+  const detailsQuery = useQuery({
+    enabled: Boolean(selectedStudentId) && Boolean(selectedCourseId),
+    queryKey: ['student-profile-viewer', 'details', selectedStudentId, selectedCourseId],
+    queryFn: async () =>
+      normalizeDetails(
+        await fetchFirst([
+          `/api/performance-panel/details?studentId=${selectedStudentId}&courseId=${selectedCourseId}`,
+          `/api/performance?studentId=${selectedStudentId}&courseId=${selectedCourseId}`,
+          `/api/student-profile/details?studentId=${selectedStudentId}&courseId=${selectedCourseId}`
+        ])
+      )
+  });
 
   return (
-    <section className="space-y-5 rounded-3xl border border-slate-200 bg-white p-6" shadow-sm>
-      <div>
+    <section className="rounded-3xl border border-slate-300 bg-white p-6 shadow-sm">
+      <div className="mb-5">
         <h2 className="text-2xl font-semibold text-slate-900">{title}</h2>
-        <p className="mt-2 text-slate-500">{description}</p>
+        <p className="mt-2 text-slate-600">{description}</p>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
+      <div className="grid gap-4 xl:grid-cols-3">
         <label className="space-y-2">
-          <span className="text-sm text-slate-500">Поиск студента</span>
+          <span className="text-sm font-medium text-slate-700">Поиск студента</span>
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="ФИО, email, группа или студенческий билет"
-            className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400"
+            placeholder="ФИО, группа или id"
+            className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-500"
           />
         </label>
 
         <label className="space-y-2">
-          <span className="text-sm text-slate-500">Студент</span>
+          <span className="text-sm font-medium text-slate-700">Студент</span>
           <select
-            value={studentId}
-            onChange={(event) => setStudentId(event.target.value)}
-            className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none focus:border-blue-400"
+            value={selectedStudentId}
+            onChange={(event) => setSelectedStudentId(event.target.value)}
+            className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-500"
           >
-            {(optionsQuery.data ?? []).map((option) => (
-              <option key={option.studentId} value={option.studentId}>
-                {option.fullName} · {option.groupCode}
+            {!filteredStudents.length && <option value="">Нет студентов</option>}
+            {filteredStudents.map((student) => (
+              <option key={student.studentId} value={student.studentId}>
+                {student.fullName} — {student.groupCode}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="space-y-2">
+          <span className="text-sm font-medium text-slate-700">Курс</span>
+          <select
+            value={selectedCourseId}
+            onChange={(event) => setSelectedCourseId(event.target.value)}
+            className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-500"
+          >
+            {!coursesQuery.data?.length && <option value="">Нет курсов</option>}
+            {(coursesQuery.data ?? []).map((course) => (
+              <option key={course.courseId} value={course.courseId}>
+                {course.courseName}
               </option>
             ))}
           </select>
         </label>
       </div>
 
-      {optionsQuery.isLoading && <p className="text-slate-500">Загрузка списка студентов...</p>}
-
-      {!optionsQuery.isLoading && (optionsQuery.data ?? []).length === 0 && (
-        <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-amber-200">
-          По заданному запросу студенты не найдены.
+      {studentsQuery.isLoading && (
+        <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-600">
+          Загрузка списка студентов...
         </div>
       )}
 
-      {profileQuery.isLoading && <p className="text-slate-500">Загрузка профиля студента...</p>}
-
-      {profileQuery.isError && (
-        <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-rose-200">
-          {errorMessage}
+      {studentsQuery.isError && (
+        <div className="mt-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-rose-700">
+          Не удалось загрузить список студентов.
         </div>
       )}
 
-      {profileQuery.data && (
-        <>
-          <div className="grid gap-4 xl:grid-cols-3">
-            <div className="rounded-3xl border border-slate-200 bg-white p-5" shadow-sm>
-              <div className="text-sm text-slate-500">ФИО</div>
-              <div className="mt-2 text-xl font-semibold text-white">{profileQuery.data.fullName}</div>
-              <div className="mt-3 text-sm text-slate-500">Логин: {profileQuery.data.username}</div>
-              <div className="text-sm text-slate-500">Email: {profileQuery.data.email || '—'}</div>
-            </div>
-            <div className="rounded-3xl border border-slate-200 bg-white p-5" shadow-sm>
-              <div className="text-sm text-slate-500">Учебные данные</div>
-              <div className="mt-2 space-y-2 text-sm text-slate-700">
-                <div>Группа: <span className="text-white">{profileQuery.data.groupCode}</span></div>
-                <div>Курс: <span className="text-white">{profileQuery.data.courseNo}</span></div>
-                <div>Студенческий билет: <span className="text-white">{profileQuery.data.studentCard || '—'}</span></div>
+      {coursesQuery.isLoading && selectedStudentId && (
+        <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-600">
+          Загрузка списка курсов...
+        </div>
+      )}
+
+      {coursesQuery.isError && selectedStudentId && (
+        <div className="mt-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-rose-700">
+          Не удалось загрузить курсы выбранного студента.
+        </div>
+      )}
+
+      {detailsQuery.isLoading && selectedStudentId && selectedCourseId && (
+        <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-600">
+          Загрузка профиля студента...
+        </div>
+      )}
+
+      {detailsQuery.isError && selectedStudentId && selectedCourseId && (
+        <div className="mt-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-rose-700">
+          Не удалось загрузить детали по студенту и курсу.
+        </div>
+      )}
+
+      {detailsQuery.data && (
+        <div className="mt-6 space-y-6">
+          <div className="grid gap-4 lg:grid-cols-4">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <div className="text-sm text-slate-500">Студент</div>
+              <div className="mt-1 font-semibold text-slate-900">
+                {detailsQuery.data.studentName}
               </div>
             </div>
-            <div className="rounded-3xl border border-slate-200 bg-white p-5" shadow-sm>
-              <div className="text-sm text-slate-500">Факультет и специальность</div>
-              <div className="mt-2 text-sm text-slate-700">{profileQuery.data.facultyName}</div>
-              <div className="mt-2 text-sm text-white">{profileQuery.data.specializationName}</div>
-              <div className="mt-4 text-sm text-slate-500">
-                Статус: {profileQuery.data.active ? 'активен' : 'не активен'} · {profileQuery.data.approved ? 'одобрен' : 'не одобрен'}
+
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <div className="text-sm text-slate-500">Группа</div>
+              <div className="mt-1 font-semibold text-slate-900">
+                {detailsQuery.data.groupCode}
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <div className="text-sm text-slate-500">Средний по предмету</div>
+              <div className="mt-1 font-semibold text-slate-900">
+                {formatNumber(detailsQuery.data.averageSelectedCourse)}
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <div className="text-sm text-slate-500">Прогноз</div>
+              <div className="mt-1 font-semibold text-slate-900">
+                {formatNumber(detailsQuery.data.predictedFinalGrade)}
               </div>
             </div>
           </div>
 
-          <div className="space-y-4">
-            {profileQuery.data.subjects.length === 0 && (
-              <div className="rounded-2xl border border-slate-200 bg-white px-4 py-6 text-center text-slate-500">
-                У этого студента пока нет учебных записей и оценок.
+          <div className="grid gap-4 lg:grid-cols-4">
+            <div className="rounded-2xl border border-slate-200 bg-white p-4">
+              <div className="text-sm text-slate-500">Средний по всем курсам</div>
+              <div className="mt-1 font-semibold text-slate-900">
+                {formatNumber(detailsQuery.data.averageAllCourses)}
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-4">
+              <div className="text-sm text-slate-500">Количество оценок</div>
+              <div className="mt-1 font-semibold text-slate-900">
+                {formatNumber(detailsQuery.data.gradeCount)}
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-4">
+              <div className="text-sm text-slate-500">Посещаемость</div>
+              <div className="mt-1 font-semibold text-slate-900">
+                {detailsQuery.data.attendanceRate === undefined
+                  ? '—'
+                  : `${detailsQuery.data.attendanceRate}%`}
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-4">
+              <div className="text-sm text-slate-500">Пропущено часов</div>
+              <div className="mt-1 font-semibold text-slate-900">
+                {detailsQuery.data.missedHours === undefined ? '—' : detailsQuery.data.missedHours}
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+            <h3 className="text-lg font-semibold text-slate-900">Сводка</h3>
+            <p className="mt-2 text-slate-700">{detailsQuery.data.recommendationSummary}</p>
+
+            {(detailsQuery.data.lastThreeGrades || detailsQuery.data.trend || detailsQuery.data.modelVersion) && (
+              <div className="mt-4 grid gap-3 md:grid-cols-3">
+                <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                  <div className="text-sm text-slate-500">Последние оценки</div>
+                  <div className="mt-1 font-medium text-slate-900">
+                    {detailsQuery.data.lastThreeGrades ?? '—'}
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                  <div className="text-sm text-slate-500">Динамика</div>
+                  <div className="mt-1 font-medium text-slate-900">
+                    {detailsQuery.data.trend ?? '—'}
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                  <div className="text-sm text-slate-500">Версия модели</div>
+                  <div className="mt-1 font-medium text-slate-900">
+                    {detailsQuery.data.modelVersion ?? '—'}
+                  </div>
+                </div>
               </div>
             )}
-
-            {profileQuery.data.subjects.map((subject) => (
-              <div key={subject.courseId} className="rounded-3xl border border-slate-200 bg-white p-5" shadow-sm>
-                <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-                  <div>
-                    <h3 className="text-xl font-semibold text-slate-900">{subject.courseName}</h3>
-                    <p className="mt-1 text-sm text-slate-500">{subject.courseCode}</p>
-                  </div>
-                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                    <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
-                      <div className="text-xs uppercase tracking-wide text-slate-500">Средний балл</div>
-                      <div className="mt-1 text-lg font-semibold text-white">{subject.averageGrade.toFixed(2)}</div>
-                    </div>
-                    <div className="rounded-2xl border border-blue-500/30 bg-blue-500/10 px-4 py-3">
-                      <div className="text-xs uppercase tracking-wide text-blue-200">Прогнозный балл</div>
-                      <div className="mt-1 text-lg font-semibold text-white">{subject.predictedGrade.toFixed(2)}</div>
-                    </div>
-                    <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
-                      <div className="text-xs uppercase tracking-wide text-slate-500">Посещаемость</div>
-                      <div className="mt-1 text-lg font-semibold text-white">{subject.attendanceRate.toFixed(2)}%</div>
-                    </div>
-                    <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
-                      <div className="text-xs uppercase tracking-wide text-slate-500">Риск / пропуски</div>
-                      <div className="mt-1 text-lg font-semibold text-white">{riskLabel(subject.riskLevel)} · {subject.missedHours} ч</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-5 overflow-x-auto rounded-2xl border border-slate-200">
-                  <table className="min-w-full text-left text-sm text-slate-700">
-                    <thead className="bg-slate-50 text-slate-500">
-                      <tr>
-                        <th className="px-4 py-3 font-medium">Дата</th>
-                        <th className="px-4 py-3 font-medium">Оценка</th>
-                        <th className="px-4 py-3 font-medium">Тип оценки</th>
-                        <th className="px-4 py-3 font-medium">Контрольная точка</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {subject.grades.length === 0 && (
-                        <tr>
-                          <td colSpan={4} className="px-4 py-6 text-center text-slate-500">
-                            По этому предмету пока нет выставленных оценок.
-                          </td>
-                        </tr>
-                      )}
-                      {subject.grades.map((grade, index) => (
-                        <tr key={`${subject.courseId}-${index}`} className="border-t border-slate-200">
-                          <td className="px-4 py-3">{formatDate(grade.gradedDate)}</td>
-                          <td className="px-4 py-3 font-semibold text-slate-900">{grade.gradeValue.toFixed(2)}</td>
-                          <td className="px-4 py-3">{grade.assessmentType}</td>
-                          <td className="px-4 py-3">{grade.assessmentTitle}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                <div className="mt-4">
-                  <div className="mb-2 text-sm font-medium text-slate-700">Рекомендации</div>
-                  {subject.recommendations.length === 0 ? (
-                    <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-500">
-                      Для этого предмета пока нет рекомендаций.
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {subject.recommendations.map((item, index) => (
-                        <div key={`${subject.courseId}-rec-${index}`} className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700">
-                          {item}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
           </div>
-        </>
+
+          <div className="rounded-2xl border border-slate-200 bg-white p-5">
+            <h3 className="text-lg font-semibold text-slate-900">Рекомендации</h3>
+
+            {detailsQuery.data.recommendations.length ? (
+              <ul className="mt-3 space-y-3">
+                {detailsQuery.data.recommendations.map((recommendation, index) => (
+                  <li
+                    key={`${recommendation}-${index}`}
+                    className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700"
+                  >
+                    {recommendation}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-3 text-slate-600">Рекомендации отсутствуют.</p>
+            )}
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-white p-5">
+            <h3 className="text-lg font-semibold text-slate-900">Оценки по выбранному курсу</h3>
+
+            <div className="mt-4 overflow-x-auto">
+              <table className="min-w-full border-separate border-spacing-0 text-sm">
+                <thead>
+                  <tr className="bg-slate-100 text-slate-700">
+                    <th className="rounded-l-2xl px-4 py-3 text-left font-semibold">№</th>
+                    <th className="px-4 py-3 text-left font-semibold">Тип</th>
+                    <th className="px-4 py-3 text-left font-semibold">Оценка</th>
+                    <th className="rounded-r-2xl px-4 py-3 text-left font-semibold">Дата</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {detailsQuery.data.points.length ? (
+                    detailsQuery.data.points.map((point) => (
+                      <tr key={`${point.orderNo}-${point.gradedAt}`} className="border-b border-slate-200">
+                        <td className="px-4 py-3 text-slate-700">{point.orderNo}</td>
+                        <td className="px-4 py-3 text-slate-700">{point.gradeType}</td>
+                        <td className="px-4 py-3 font-medium text-slate-900">{point.value}</td>
+                        <td className="px-4 py-3 text-slate-700">{formatDate(point.gradedAt)}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={4} className="px-4 py-6 text-center text-slate-500">
+                        По выбранному курсу оценок пока нет.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       )}
     </section>
   );

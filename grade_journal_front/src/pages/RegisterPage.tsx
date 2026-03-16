@@ -1,3 +1,4 @@
+import { GithubLoginButton } from '../components/GithubLoginButton';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
@@ -145,7 +146,17 @@ export function RegisterPage() {
             {mutation.isPending ? 'Отправка...' : 'Отправить заявку'}
           </button>
         </div>
-      </form>
+            <div className="mt-4 space-y-3">
+        <GithubLoginButton
+          requestedRole="student"
+          label="Регистрация студента через GitHub"
+        />
+        <GithubLoginButton
+          requestedRole="teacher"
+          label="Регистрация преподавателя через GitHub"
+        />
+      </div>
+</form>
 
       <p className="mt-6 text-sm text-slate-500">
         Уже есть аккаунт?{' '}

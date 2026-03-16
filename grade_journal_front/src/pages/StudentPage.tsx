@@ -6,11 +6,11 @@ import { StudentProfileViewerPanel } from '../components/StudentProfileViewerPan
 import { GroupViewerPanel } from '../components/GroupViewerPanel';
 import { SchedulePanel } from '../components/SchedulePanel';
 import { UserDirectoryPanel, type DirectoryControlMode } from '../components/UserDirectoryPanel';
-import type { ProfileResponse } from '../types/profile';
 import { TeacherSchedulePanel } from '../components/TeacherSchedulePanel';
 import { GroupComparisonPanel } from '../components/GroupComparisonPanel';
 import { StudentComparisonPanel } from '../components/StudentComparisonPanel';
 import { RiskGroupsPanel } from '../components/RiskGroupsPanel';
+import type { ProfileResponse as BaseProfileResponse } from '../types/profile';
 
 type PanelKey =
   | 'home'
@@ -25,22 +25,39 @@ type PanelKey =
   | 'student-comparison'
   | 'risk-groups';
 
+type ProfileApiResponse = BaseProfileResponse & {
+  studentInfo?: BaseProfileResponse['student'];
+  teacherInfo?: BaseProfileResponse['teacher'];
+};
+
 function getDirectoryMode(panel: PanelKey): DirectoryControlMode | null {
   return panel === 'directory-explorer' ? 'explorer' : null;
+}
+
+function profileValue(value: unknown) {
+  if (value === null || value === undefined || value === '') {
+    return '—';
+  }
+  return String(value);
+}
+
+function normalizeProfile(raw: ProfileApiResponse): BaseProfileResponse {
+  return {
+    ...raw,
+    student: raw.student ?? raw.studentInfo ?? null,
+    teacher: raw.teacher ?? raw.teacherInfo ?? null
+  };
 }
 
 export function StudentPage() {
   const [activePanel, setActivePanel] = useState<PanelKey>('home');
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['profile', 'me'],
-    queryFn: async () => (await api.get<ProfileResponse>('/api/profile/me')).data
+  const profileQuery = useQuery({
+    queryKey: ['profile', 'me', 'student-page'],
+    queryFn: async () => normalizeProfile((await api.get<ProfileApiResponse>('/api/profile/me')).data)
   });
 
-  if (isLoading) {
-    return <p className="text-slate-500">Загрузка профиля...</p>;
-  }
-
+  const data = profileQuery.data;
   const directoryMode = getDirectoryMode(activePanel);
 
   const buttons: Array<{ key: PanelKey; title: string; subtitle: string }> = [
@@ -56,51 +73,35 @@ export function StudentPage() {
       title: 'Расписание преподавателей',
       subtitle: 'Пары выбранного преподавателя'
     },
-    {
-      key: 'performance',
-      title: 'Успеваемость',
-      subtitle: 'Оценки, средние баллы и прогноз'
-    },
-    {
-      key: 'student-profile',
-      title: 'Профиль студента',
-      subtitle: 'Полный просмотр данных'
-    },
+    { key: 'performance', title: 'Успеваемость', subtitle: 'Оценки, средние баллы и прогноз' },
+    { key: 'student-profile', title: 'Профиль студента', subtitle: 'Просмотр данных студента' },
     { key: 'group-viewer', title: 'Просмотр групп', subtitle: 'Состав выбранной группы' },
-    {
-      key: 'group-comparison',
-      title: 'Сравнение групп',
-      subtitle: 'Средний балл по группам'
-    },
+    { key: 'group-comparison', title: 'Сравнение групп', subtitle: 'Средний балл по группам' },
     {
       key: 'student-comparison',
       title: 'Сравнение студентов',
       subtitle: 'Таблица со средними баллами'
     },
-    {
-      key: 'risk-groups',
-      title: 'Группы риска',
-      subtitle: 'Распределение студентов по рискам'
-    }
+    { key: 'risk-groups', title: 'Группы риска', subtitle: 'Распределение студентов по рискам' }
   ];
 
   return (
-    <div className="w-full max-w-none min-w-0 space-y-6">
-      <section className="w-full max-w-none min-w-0 rounded-3xl border border-slate-200 bg-white p-8" shadow-sm>
+    <div className="space-y-6">
+      <section className="rounded-3xl border border-slate-300 bg-white p-8 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Главная панель студента</h1>
-            <p className="mt-2 max-w-4xl text-slate-500">
+            <h1 className="text-3xl font-bold text-slate-900">Панель студента</h1>
+            <p className="mt-2 max-w-4xl text-slate-600">
               Здесь собраны основные разделы студента: профиль, расписание, успеваемость,
-              просмотр группы, сравнение групп и студентов, а также анализ по группам риска.
+              сравнение и аналитика.
             </p>
           </div>
 
           <button
             onClick={() => setActivePanel('home')}
-            className="rounded-2xl border border-slate-300 bg-white px-4 py-3 font-medium text-slate-700 hover:bg-slate-100"
+            className="rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 font-medium text-slate-700 transition hover:bg-slate-100"
           >
-            На главную панель
+            На главную
           </button>
         </div>
 
@@ -111,8 +112,8 @@ export function StudentPage() {
               onClick={() => setActivePanel(button.key)}
               className={`rounded-2xl px-5 py-4 text-left transition ${
                 activePanel === button.key
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-white text-slate-700 hover:bg-slate-100'
+                  ? 'bg-blue-600 text-white'
+                  : 'border border-slate-300 bg-slate-50 text-slate-800 hover:bg-slate-100'
               }`}
             >
               <div className="text-sm opacity-80">{button.subtitle}</div>
@@ -123,131 +124,143 @@ export function StudentPage() {
       </section>
 
       {activePanel === 'home' && (
-        <section className="w-full max-w-none min-w-0 rounded-3xl border border-slate-200 bg-white p-6 text-slate-700" shadow-sm>
+        <section className="rounded-3xl border border-slate-300 bg-white p-6 shadow-sm">
           <h2 className="text-2xl font-semibold text-slate-900">Рабочее пространство студента</h2>
-          <p className="mt-2 text-slate-500">
-            Выберите нужный раздел с помощью кнопок выше. Студент может смотреть свой профиль,
-            расписание, успеваемость, состав группы и аналитические сводки.
+          <p className="mt-2 text-slate-600">
+            Выберите нужный раздел сверху. Блок профиля и просмотр данных студента переведены на
+            корректную работу с /api/profile/me.
           </p>
         </section>
       )}
 
       {activePanel === 'profile' && (
         <section className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-3xl border border-slate-200 bg-white p-6" shadow-sm>
-            <h2 className="mb-4 text-xl font-semibold text-slate-900">Основная информация</h2>
-            <div className="space-y-3 text-slate-700">
-              <p>
-                <span className="text-slate-500">ФИО:</span> {data?.fullName}
+          <div className="rounded-3xl border border-slate-300 bg-white p-6 shadow-sm">
+            <h2 className="mb-4 text-xl font-semibold text-slate-900">Основные данные</h2>
+
+            {profileQuery.isLoading ? (
+              <p className="text-slate-500">Загрузка профиля...</p>
+            ) : profileQuery.isError ? (
+              <p className="text-rose-600">
+                Не удалось загрузить профиль студента. Проверь backend /api/profile/me.
               </p>
-              <p>
-                <span className="text-slate-500">Логин:</span> {data?.username}
-              </p>
-              <p>
-                <span className="text-slate-500">Email:</span> {data?.email || '—'}
-              </p>
-              <p>
-                <span className="text-slate-500">Роль:</span> Студент
-              </p>
-            </div>
+            ) : (
+              <div className="space-y-3 text-slate-700">
+                <p>
+                  <span className="text-slate-500">ФИО:</span> {profileValue(data?.fullName)}
+                </p>
+                <p>
+                  <span className="text-slate-500">Логин:</span> {profileValue(data?.username)}
+                </p>
+                <p>
+                  <span className="text-slate-500">Email:</span> {profileValue(data?.email)}
+                </p>
+                <p>
+                  <span className="text-slate-500">Роль:</span> {profileValue(data?.role ?? 'student')}
+                </p>
+              </div>
+            )}
           </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-6" shadow-sm>
-            <h2 className="mb-4 text-xl font-semibold text-slate-900">Информация студента</h2>
-            <div className="space-y-3 text-slate-700">
-              <p>
-                <span className="text-slate-500">Студенческий билет:</span>{' '}
-                {data?.student?.studentCard || '—'}
-              </p>
-              <p>
-                <span className="text-slate-500">Группа:</span>{' '}
-                {data?.student?.groupCode || '—'}
-              </p>
-              <p>
-                <span className="text-slate-500">Курс:</span>{' '}
-                {data?.student?.courseNo || '—'}
-              </p>
-              <p>
-                <span className="text-slate-500">Факультет:</span>{' '}
-                {data?.student?.facultyName || '—'}
-              </p>
-              <p>
-                <span className="text-slate-500">Специальность:</span>{' '}
-                {data?.student?.specializationName || '—'}
-              </p>
-            </div>
+          <div className="rounded-3xl border border-slate-300 bg-white p-6 shadow-sm">
+            <h2 className="mb-4 text-xl font-semibold text-slate-900">Данные студента</h2>
+
+            {profileQuery.isLoading ? (
+              <p className="text-slate-500">Загрузка данных студента...</p>
+            ) : profileQuery.isError ? (
+              <p className="text-rose-600">Профиль не удалось отобразить.</p>
+            ) : (
+              <div className="space-y-3 text-slate-700">
+                <p>
+                  <span className="text-slate-500">Студенческий билет:</span>{' '}
+                  {profileValue(data?.student?.studentCard)}
+                </p>
+                <p>
+                  <span className="text-slate-500">Группа:</span>{' '}
+                  {profileValue(data?.student?.groupCode)}
+                </p>
+                <p>
+                  <span className="text-slate-500">Курс:</span>{' '}
+                  {profileValue(data?.student?.courseNo)}
+                </p>
+                <p>
+                  <span className="text-slate-500">Факультет:</span>{' '}
+                  {profileValue(data?.student?.facultyName)}
+                </p>
+                <p>
+                  <span className="text-slate-500">Специальность:</span>{' '}
+                  {profileValue(data?.student?.specializationName)}
+                </p>
+              </div>
+            )}
           </div>
         </section>
       )}
 
       {directoryMode && (
-        <div className="directory-panel-shell w-full max-w-none min-w-0">
-          <UserDirectoryPanel
+        <UserDirectoryPanel
           endpoint="/api/users/directory"
           queryKey={['directory', 'student']}
           title="Поиск, фильтр и сортировка"
-          description="Используйте единое окно поиска, фильтров и сортировки для просмотра справочника пользователей."
+          description="Используйте поиск, фильтры и сортировку для просмотра пользователей системы."
           activeControl={directoryMode}
-         />
-        </div>
+        />
       )}
 
       {activePanel === 'schedule' && (
-        <div className="schedule-panel-shell w-full max-w-none min-w-0">
-          <SchedulePanel
+        <SchedulePanel
           canManage={false}
           title="Расписание"
-          description="Студент может просматривать расписание выбранной группы."
-         />
-        </div>
+          description="Просмотр расписания групп."
+        />
       )}
 
       {activePanel === 'teacher-schedule' && (
         <TeacherSchedulePanel
           title="Расписание преподавателей"
-          description="Выберите преподавателя, чтобы увидеть его пары."
+          description="Выберите преподавателя и просмотрите его пары."
         />
       )}
 
       {activePanel === 'performance' && (
         <PerformancePanel
           title="Успеваемость"
-          description="Выберите студента и предмет, чтобы увидеть оценки, средние показатели и прогнозную следующую оценку."
+          description="Просмотр оценок, средних показателей и прогноза по студенту."
         />
       )}
 
       {activePanel === 'student-profile' && (
         <StudentProfileViewerPanel
-          title="Мой профиль студента"
-          description="Студент видит только свой профиль, все оценки по предметам, прогнозы и рекомендации."
+          title="Профиль студента"
+          description="Выберите студента и курс, чтобы увидеть оценки, рекомендации и динамику."
         />
       )}
 
       {activePanel === 'group-viewer' && (
         <GroupViewerPanel
           title="Просмотр групп"
-          description="Студент может выбрать группу и посмотреть список студентов этой группы с базовой информацией."
+          description="Выберите группу и просмотрите список студентов."
         />
       )}
 
       {activePanel === 'group-comparison' && (
         <GroupComparisonPanel
           title="Сравнение групп"
-          description="Список всех групп и их средний балл."
+          description="Список всех групп и средний балл по каждой."
         />
       )}
 
       {activePanel === 'student-comparison' && (
         <StudentComparisonPanel
           title="Сравнение студентов"
-          description="Таблица всех студентов со средним баллом по всем оценкам."
+          description="Таблица студентов со средними баллами и сортировкой."
         />
       )}
 
       {activePanel === 'risk-groups' && (
         <RiskGroupsPanel
           title="Группы риска"
-          description="Распределение студентов на три группы по среднему баллу."
+          description="Распределение студентов по группам риска."
         />
       )}
     </div>

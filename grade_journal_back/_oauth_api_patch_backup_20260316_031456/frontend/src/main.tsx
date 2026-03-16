@@ -1,4 +1,3 @@
-import './oauth2Bridge';
 import './light-theme-overrides.css';
 import React from 'react';
 import ReactDOM from 'react-dom/client';

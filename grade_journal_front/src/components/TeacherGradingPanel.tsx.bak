@@ -27,36 +27,92 @@ type GradeRow = {
   enrollmentId: number;
   fullName: string;
   studentCard: string;
-  isPresent: boolean;
+  present: boolean;
   missedHours: number;
   gradeValue: string;
   teacherComment: string;
 };
 
+function unwrapArray(value: any): any[] {
+  if (Array.isArray(value)) return value;
+  if (Array.isArray(value?.items)) return value.items;
+  if (Array.isArray(value?.content)) return value.content;
+  if (Array.isArray(value?.data)) return value.data;
+  return [];
+}
+
+function normalizeGroups(raw: any): GroupOption[] {
+  return unwrapArray(raw)
+    .map((item: any) => ({
+      groupId: Number(item.groupId ?? 0),
+      groupCode: String(item.groupCode ?? ''),
+      courseNo: Number(item.courseNo ?? 0)
+    }))
+    .filter((item: GroupOption) => item.groupId > 0 && item.groupCode.trim().length > 0)
+    .sort((a: GroupOption, b: GroupOption) => a.groupCode.localeCompare(b.groupCode, 'ru'));
+}
+
+function normalizeLessons(raw: any): LessonOption[] {
+  return unwrapArray(raw)
+    .map((item: any) => ({
+      scheduleId: Number(item.scheduleId ?? 0),
+      lessonDate: String(item.lessonDate ?? ''),
+      timeSlot: String(item.timeSlot ?? ''),
+      courseName: String(item.courseName ?? ''),
+      groupCode: String(item.groupCode ?? ''),
+      topic: String(item.topic ?? '')
+    }))
+    .filter((item: LessonOption) => item.scheduleId > 0)
+    .sort((a: LessonOption, b: LessonOption) => {
+      const da = new Date(a.lessonDate).getTime();
+      const db = new Date(b.lessonDate).getTime();
+      if (da !== db) return da - db;
+      return a.timeSlot.localeCompare(b.timeSlot, 'ru');
+    });
+}
+
+function normalizeRows(raw: any): GradeRow[] {
+  return unwrapArray(raw)
+    .map((item: any) => ({
+      studentId: Number(item.studentId ?? 0),
+      enrollmentId: Number(item.enrollmentId ?? 0),
+      fullName: String(item.fullName ?? ''),
+      studentCard: String(item.studentCard ?? ''),
+      present: Boolean(item.present ?? false),
+      missedHours: Number(item.missedHours ?? 0),
+      gradeValue:
+        item.gradeValue === null || item.gradeValue === undefined
+          ? ''
+          : String(Math.round(Number(item.gradeValue))),
+      teacherComment: String(item.teacherComment ?? '')
+    }))
+    .filter((item: GradeRow) => item.studentId > 0 && item.enrollmentId > 0 && item.fullName.trim().length > 0)
+    .sort((a: GradeRow, b: GradeRow) => a.fullName.localeCompare(b.fullName, 'ru'));
+}
+
 function formatDate(value: string) {
-  if (!value) {
-    return '—';
-  }
-
+  if (!value) return '—';
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-
-  return date.toLocaleDateString();
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString('ru-RU');
 }
 
 function clampGrade(value: string) {
-  if (value.trim() === '') {
-    return '';
-  }
+  if (value.trim() === '') return '';
 
   const numeric = Number(value.replace(',', '.'));
-  if (Number.isNaN(numeric)) {
-    return '';
-  }
+  if (Number.isNaN(numeric)) return '';
 
   return String(Math.max(0, Math.min(10, Math.round(numeric))));
+}
+
+function extractErrorMessage(error: any) {
+  return (
+    error?.response?.data?.message ||
+    error?.response?.data?.error ||
+    error?.message ||
+    'Не удалось выполнить запрос.'
+  );
 }
 
 export function TeacherGradingPanel({ title, description }: Props) {
@@ -67,8 +123,10 @@ export function TeacherGradingPanel({ title, description }: Props) {
 
   const groupsQuery = useQuery({
     queryKey: ['teacher-grading', 'groups'],
-    queryFn: async () =>
-      (await api.get<GroupOption[]>('/api/teacher-grading/groups')).data
+    queryFn: async () => {
+      const response = await api.get('/api/teacher-grading/groups');
+      return normalizeGroups(response.data);
+    }
   });
 
   useEffect(() => {
@@ -77,48 +135,46 @@ export function TeacherGradingPanel({ title, description }: Props) {
     }
   }, [selectedGroupId, groupsQuery.data]);
 
+  useEffect(() => {
+    setSelectedLessonId('');
+    setRows([]);
+    setMessage(null);
+  }, [selectedGroupId]);
+
   const lessonsQuery = useQuery({
     enabled: Boolean(selectedGroupId),
     queryKey: ['teacher-grading', 'lessons', selectedGroupId],
-    queryFn: async () =>
-      (
-        await api.get<LessonOption[]>('/api/teacher-grading/lessons', {
-          params: { groupId: selectedGroupId }
-        })
-      ).data
+    queryFn: async () => {
+      const response = await api.get('/api/teacher-grading/lessons', {
+        params: { groupId: Number(selectedGroupId) }
+      });
+      return normalizeLessons(response.data);
+    }
   });
 
   useEffect(() => {
-    setSelectedLessonId('');
-  }, [selectedGroupId]);
+    if (lessonsQuery.data?.length) {
+      const exists = lessonsQuery.data.some(
+        (lesson) => String(lesson.scheduleId) === selectedLessonId
+      );
 
-  useEffect(() => {
-    if (!selectedLessonId && lessonsQuery.data?.length) {
-      setSelectedLessonId(String(lessonsQuery.data[0].scheduleId));
+      if (!selectedLessonId || !exists) {
+        setSelectedLessonId(String(lessonsQuery.data[0].scheduleId));
+      }
+    } else {
+      setSelectedLessonId('');
     }
   }, [selectedLessonId, lessonsQuery.data]);
 
   const rowsQuery = useQuery({
     enabled: Boolean(selectedLessonId),
-    queryKey: ['teacher-grading', 'lesson-students', selectedLessonId],
-    queryFn: async () =>
-      (
-        await api.get<any[]>('/api/teacher-grading/lesson-students', {
-          params: { scheduleId: selectedLessonId }
-        })
-      ).data.map((item) => ({
-        studentId: Number(item.studentId),
-        enrollmentId: Number(item.enrollmentId),
-        fullName: String(item.fullName ?? ''),
-        studentCard: String(item.studentCard ?? ''),
-        isPresent: Boolean(item.present),
-        missedHours: Number(item.missedHours ?? 0),
-        gradeValue:
-          item.gradeValue === null || item.gradeValue === undefined
-            ? ''
-            : String(Math.round(Number(item.gradeValue))),
-        teacherComment: String(item.teacherComment ?? '')
-      }))
+    queryKey: ['teacher-grading', 'rows', selectedLessonId],
+    queryFn: async () => {
+      const response = await api.get('/api/teacher-grading/lesson-students', {
+        params: { scheduleId: Number(selectedLessonId) }
+      });
+      return normalizeRows(response.data);
+    }
   });
 
   useEffect(() => {
@@ -126,32 +182,42 @@ export function TeacherGradingPanel({ title, description }: Props) {
   }, [rowsQuery.data]);
 
   const selectedLesson = useMemo(
-    () => (lessonsQuery.data ?? []).find((item) => String(item.scheduleId) === selectedLessonId),
+    () => (lessonsQuery.data ?? []).find((lesson) => String(lesson.scheduleId) === selectedLessonId),
     [lessonsQuery.data, selectedLessonId]
   );
 
+  const stats = useMemo(() => {
+    return {
+      total: rows.length,
+      withGrades: rows.filter((row) => row.gradeValue !== '').length,
+      absent: rows.filter((row) => !row.present).length
+    };
+  }, [rows]);
+
   const saveMutation = useMutation({
     mutationFn: async () => {
-      await api.post(`/api/teacher-grading/lesson-students/${selectedLessonId}/save`, {
+      const payload = {
         students: rows.map((row) => ({
           studentId: row.studentId,
           enrollmentId: row.enrollmentId,
-          present: row.isPresent,
+          present: row.present,
           gradeValue: row.gradeValue.trim() === '' ? null : Number(clampGrade(row.gradeValue)),
           teacherComment: row.teacherComment.trim() === '' ? null : row.teacherComment.trim()
         }))
-      });
+      };
+
+      await api.post(
+        `/api/teacher-grading/lesson-students/${Number(selectedLessonId)}/save`,
+        payload
+      );
     },
     onSuccess: async () => {
       await rowsQuery.refetch();
-      setMessage('Сохранено. Данные отправлены на сервер и перечитаны заново.');
+      const now = new Date().toLocaleTimeString('ru-RU');
+      setMessage(`Сохранено успешно (${now}). Таблица перечитана из базы.`);
     },
     onError: (error: any) => {
-      const serverMessage =
-        error?.response?.data?.message ||
-        error?.response?.data?.error ||
-        'Не удалось сохранить оценки и посещаемость.';
-      setMessage(serverMessage);
+      setMessage(extractErrorMessage(error));
     }
   });
 
@@ -179,7 +245,7 @@ export function TeacherGradingPanel({ title, description }: Props) {
             {!groupsQuery.data?.length && <option value="">Нет групп</option>}
             {(groupsQuery.data ?? []).map((group) => (
               <option key={group.groupId} value={group.groupId}>
-                {group.groupCode}
+                {group.groupCode} — курс {group.courseNo}
               </option>
             ))}
           </select>
@@ -210,7 +276,7 @@ export function TeacherGradingPanel({ title, description }: Props) {
 
       {groupsQuery.isError && (
         <div className="mt-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-rose-700">
-          Не удалось загрузить список групп.
+          Не удалось загрузить список групп: {extractErrorMessage(groupsQuery.error)}
         </div>
       )}
 
@@ -222,7 +288,7 @@ export function TeacherGradingPanel({ title, description }: Props) {
 
       {lessonsQuery.isError && selectedGroupId && (
         <div className="mt-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-rose-700">
-          Не удалось загрузить пары для выбранной группы.
+          Не удалось загрузить пары: {extractErrorMessage(lessonsQuery.error)}
         </div>
       )}
 
@@ -252,6 +318,12 @@ export function TeacherGradingPanel({ title, description }: Props) {
         </div>
       )}
 
+      {selectedLessonId && !rowsQuery.isLoading && !rowsQuery.isError && (
+        <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700">
+          Найдено студентов: <b>{stats.total}</b>, с уже имеющейся оценкой: <b>{stats.withGrades}</b>, отсутствовали на выбранной паре: <b>{stats.absent}</b>.
+        </div>
+      )}
+
       {rowsQuery.isLoading && selectedLessonId && (
         <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-600">
           Загрузка студентов по паре...
@@ -260,7 +332,7 @@ export function TeacherGradingPanel({ title, description }: Props) {
 
       {rowsQuery.isError && selectedLessonId && (
         <div className="mt-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-rose-700">
-          Не удалось загрузить студентов по выбранной паре.
+          Не удалось загрузить студентов по выбранной паре: {extractErrorMessage(rowsQuery.error)}
         </div>
       )}
 
@@ -279,18 +351,18 @@ export function TeacherGradingPanel({ title, description }: Props) {
           <tbody>
             {rows.length ? (
               rows.map((row, index) => (
-                <tr key={`${row.studentId}-${index}`} className="border-b border-slate-200">
+                <tr key={`${row.studentId}-${row.enrollmentId}`} className="border-b border-slate-200">
                   <td className="px-4 py-3 text-slate-800">{row.fullName}</td>
                   <td className="px-4 py-3 text-slate-700">{row.studentCard || '—'}</td>
                   <td className="px-4 py-3">
                     <input
                       type="checkbox"
-                      checked={row.isPresent}
+                      checked={row.present}
                       onChange={(event) =>
                         setRows((prev) =>
                           prev.map((item, currentIndex) =>
                             currentIndex === index
-                              ? { ...item, isPresent: event.target.checked }
+                              ? { ...item, present: event.target.checked }
                               : item
                           )
                         )
@@ -355,7 +427,10 @@ export function TeacherGradingPanel({ title, description }: Props) {
 
       <div className="mt-5 flex flex-wrap gap-3">
         <button
-          onClick={() => saveMutation.mutate()}
+          onClick={() => {
+            setMessage(null);
+            saveMutation.mutate();
+          }}
           disabled={!selectedLessonId || saveMutation.isPending || rows.length === 0}
           className="rounded-2xl bg-blue-600 px-4 py-3 font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
@@ -363,7 +438,10 @@ export function TeacherGradingPanel({ title, description }: Props) {
         </button>
 
         <button
-          onClick={() => rowsQuery.refetch()}
+          onClick={() => {
+            setMessage(null);
+            rowsQuery.refetch();
+          }}
           disabled={!selectedLessonId}
           className="rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 font-medium text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
         >

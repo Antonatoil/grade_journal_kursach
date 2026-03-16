@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { api } from '../lib/api';
 
@@ -10,115 +10,224 @@ type Props = {
 type GroupOption = {
   groupId: number;
   groupCode: string;
-  courseNo: number;
 };
 
 type LessonOption = {
   scheduleId: number;
+  groupId: number;
+  groupCode: string;
+  courseName: string;
   lessonDate: string;
   timeSlot: string;
-  courseName: string;
-  groupCode: string;
   topic: string;
 };
 
 type GradeRow = {
   studentId: number;
-  enrollmentId: number;
   fullName: string;
-  studentCard: string;
+  groupCode: string;
   isPresent: boolean;
-  missedHours: number;
+  note: string;
   gradeValue: string;
-  teacherComment: string;
+  attendanceId?: number;
+  gradeId?: number;
 };
 
-function formatDate(value: string) {
-  if (!value) {
-    return '—';
+function unwrapArray(value: any): any[] {
+  if (Array.isArray(value)) return value;
+  if (Array.isArray(value?.items)) return value.items;
+  if (Array.isArray(value?.content)) return value.content;
+  if (Array.isArray(value?.data)) return value.data;
+  return [];
+}
+
+async function fetchFirst(urls: string[]) {
+  let lastError: any = null;
+
+  for (const url of urls) {
+    try {
+      const response = await api.get(url);
+      return response.data;
+    } catch (error) {
+      lastError = error;
+    }
   }
 
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
+  throw lastError ?? new Error('Не удалось загрузить данные.');
+}
+
+async function sendFirst(
+  candidates: Array<{ method: 'post' | 'put'; url: string }>,
+  body: any
+) {
+  let lastError: any = null;
+
+  for (const candidate of candidates) {
+    try {
+      const response = await api.request({
+        method: candidate.method,
+        url: candidate.url,
+        data: body
+      });
+      return response.data;
+    } catch (error) {
+      lastError = error;
+    }
   }
+
+  throw lastError ?? new Error('Не удалось сохранить данные.');
+}
+
+function normalizeGroups(raw: any): GroupOption[] {
+  return unwrapArray(raw)
+    .map((item: any) => ({
+      groupId: Number(item.groupId ?? item.id ?? item.group?.groupId ?? 0),
+      groupCode: String(item.groupCode ?? item.name ?? item.group?.groupCode ?? '')
+    }))
+    .filter((item: GroupOption) => item.groupId > 0 && item.groupCode.trim().length > 0)
+    .sort((a: GroupOption, b: GroupOption) => a.groupCode.localeCompare(b.groupCode, 'ru'));
+}
+
+function normalizeLessons(raw: any, selectedGroup: GroupOption | null): LessonOption[] {
+  return unwrapArray(raw)
+    .map((item: any, index: number) => ({
+      scheduleId: Number(item.scheduleId ?? item.id ?? item.entryId ?? item.lessonId ?? 0),
+      groupId: Number(item.groupId ?? item.group?.groupId ?? selectedGroup?.groupId ?? 0),
+      groupCode: String(item.groupCode ?? item.group?.groupCode ?? selectedGroup?.groupCode ?? ''),
+      courseName: String(
+        item.courseName ??
+        item.subjectName ??
+        item.course?.courseName ??
+        item.topic ??
+        `Пара ${index + 1}`
+      ),
+      lessonDate: String(item.lessonDate ?? item.date ?? item.classDate ?? ''),
+      timeSlot: String(item.timeSlot ?? item.time ?? item.slot ?? ''),
+      topic: String(item.topic ?? item.lessonTopic ?? item.description ?? '')
+    }))
+    .filter((item: LessonOption) => item.scheduleId > 0)
+    .sort((a: LessonOption, b: LessonOption) => {
+      const left = `${a.lessonDate} ${a.timeSlot}`;
+      const right = `${b.lessonDate} ${b.timeSlot}`;
+      return left.localeCompare(right, 'ru');
+    });
+}
+
+function normalizeRows(raw: any, selectedGroup: GroupOption | null): GradeRow[] {
+  return unwrapArray(raw)
+    .map((item: any) => ({
+      studentId: Number(item.studentId ?? item.id ?? item.student?.studentId ?? 0),
+      fullName: String(item.fullName ?? item.studentName ?? item.student?.fullName ?? item.name ?? ''),
+      groupCode: String(
+        item.groupCode ??
+        item.group?.groupCode ??
+        selectedGroup?.groupCode ??
+        ''
+      ),
+      isPresent: Boolean(item.isPresent ?? item.present ?? item.attendance?.isPresent ?? true),
+      note: String(item.note ?? item.attendanceNote ?? item.attendance?.note ?? ''),
+      gradeValue:
+        item.gradeValue === null || item.gradeValue === undefined
+          ? ''
+          : String(Math.round(Number(item.gradeValue))),
+      attendanceId:
+        item.attendanceId === null || item.attendanceId === undefined
+          ? undefined
+          : Number(item.attendanceId),
+      gradeId:
+        item.gradeId === null || item.gradeId === undefined
+          ? undefined
+          : Number(item.gradeId)
+    }))
+    .filter((item: GradeRow) => item.studentId > 0 && item.fullName.trim().length > 0)
+    .sort((a: GradeRow, b: GradeRow) => a.fullName.localeCompare(b.fullName, 'ru'));
+}
+
+function formatDate(value: string) {
+  if (!value) return '—';
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
 
   return date.toLocaleDateString();
 }
 
 function clampGrade(value: string) {
-  if (value.trim() === '') {
-    return '';
-  }
+  if (value.trim() === '') return '';
 
   const numeric = Number(value.replace(',', '.'));
-  if (Number.isNaN(numeric)) {
-    return '';
-  }
+  if (Number.isNaN(numeric)) return '';
 
   return String(Math.max(0, Math.min(10, Math.round(numeric))));
 }
 
 export function TeacherGradingPanel({ title, description }: Props) {
-  const [selectedGroupId, setSelectedGroupId] = useState('');
-  const [selectedLessonId, setSelectedLessonId] = useState('');
+  const [selectedGroupId, setSelectedGroupId] = useState<string>('');
+  const [selectedLessonId, setSelectedLessonId] = useState<string>('');
   const [rows, setRows] = useState<GradeRow[]>([]);
   const [message, setMessage] = useState<string | null>(null);
 
   const groupsQuery = useQuery({
     queryKey: ['teacher-grading', 'groups'],
     queryFn: async () =>
-      (await api.get<GroupOption[]>('/api/teacher-grading/groups')).data
+      normalizeGroups(
+        await fetchFirst([
+          '/api/group-viewer/groups',
+          '/api/teacher-grading/groups',
+          '/api/groups',
+          '/api/study-groups'
+        ])
+      )
   });
 
   useEffect(() => {
     if (!selectedGroupId && groupsQuery.data?.length) {
       setSelectedGroupId(String(groupsQuery.data[0].groupId));
     }
-  }, [selectedGroupId, groupsQuery.data]);
-
-  const lessonsQuery = useQuery({
-    enabled: Boolean(selectedGroupId),
-    queryKey: ['teacher-grading', 'lessons', selectedGroupId],
-    queryFn: async () =>
-      (
-        await api.get<LessonOption[]>('/api/teacher-grading/lessons', {
-          params: { groupId: selectedGroupId }
-        })
-      ).data
-  });
+  }, [groupsQuery.data, selectedGroupId]);
 
   useEffect(() => {
     setSelectedLessonId('');
   }, [selectedGroupId]);
 
+  const selectedGroup = useMemo(
+    () => (groupsQuery.data ?? []).find((group) => String(group.groupId) === selectedGroupId) ?? null,
+    [groupsQuery.data, selectedGroupId]
+  );
+
+  const lessonsQuery = useQuery({
+    enabled: Boolean(selectedGroupId),
+    queryKey: ['teacher-grading', 'lessons', selectedGroupId],
+    queryFn: async () =>
+      normalizeLessons(
+        await fetchFirst([
+          `/api/schedule/groups/${selectedGroupId}`,
+          `/api/teacher-grading/lessons?groupId=${selectedGroupId}`,
+          `/api/schedule?groupId=${selectedGroupId}`
+        ]),
+        selectedGroup
+      )
+  });
+
   useEffect(() => {
     if (!selectedLessonId && lessonsQuery.data?.length) {
       setSelectedLessonId(String(lessonsQuery.data[0].scheduleId));
     }
-  }, [selectedLessonId, lessonsQuery.data]);
+  }, [lessonsQuery.data, selectedLessonId]);
 
   const rowsQuery = useQuery({
-    enabled: Boolean(selectedLessonId),
-    queryKey: ['teacher-grading', 'lesson-students', selectedLessonId],
+    enabled: Boolean(selectedGroupId) && Boolean(selectedLessonId),
+    queryKey: ['teacher-grading', 'rows', selectedGroupId, selectedLessonId],
     queryFn: async () =>
-      (
-        await api.get<any[]>('/api/teacher-grading/lesson-students', {
-          params: { scheduleId: selectedLessonId }
-        })
-      ).data.map((item) => ({
-        studentId: Number(item.studentId),
-        enrollmentId: Number(item.enrollmentId),
-        fullName: String(item.fullName ?? ''),
-        studentCard: String(item.studentCard ?? ''),
-        isPresent: Boolean(item.present),
-        missedHours: Number(item.missedHours ?? 0),
-        gradeValue:
-          item.gradeValue === null || item.gradeValue === undefined
-            ? ''
-            : String(Math.round(Number(item.gradeValue))),
-        teacherComment: String(item.teacherComment ?? '')
-      }))
+      normalizeRows(
+        await fetchFirst([
+          `/api/teacher-grading/rows?scheduleId=${selectedLessonId}`,
+          `/api/teacher-grading/details?scheduleId=${selectedLessonId}`,
+          `/api/teacher-grading/students?scheduleId=${selectedLessonId}`,
+          `/api/group-viewer/groups/${selectedGroupId}/students`
+        ]),
+        selectedGroup
+      )
   });
 
   useEffect(() => {
@@ -126,32 +235,41 @@ export function TeacherGradingPanel({ title, description }: Props) {
   }, [rowsQuery.data]);
 
   const selectedLesson = useMemo(
-    () => (lessonsQuery.data ?? []).find((item) => String(item.scheduleId) === selectedLessonId),
+    () => (lessonsQuery.data ?? []).find((item) => String(item.scheduleId) === selectedLessonId) ?? null,
     [lessonsQuery.data, selectedLessonId]
   );
 
   const saveMutation = useMutation({
     mutationFn: async () => {
-      await api.post(`/api/teacher-grading/lesson-students/${selectedLessonId}/save`, {
-        students: rows.map((row) => ({
+      const payload = {
+        scheduleId: Number(selectedLessonId),
+        items: rows.map((row) => ({
           studentId: row.studentId,
-          enrollmentId: row.enrollmentId,
-          present: row.isPresent,
-          gradeValue: row.gradeValue.trim() === '' ? null : Number(clampGrade(row.gradeValue)),
-          teacherComment: row.teacherComment.trim() === '' ? null : row.teacherComment.trim()
+          gradeId: row.gradeId ?? null,
+          attendanceId: row.attendanceId ?? null,
+          isPresent: row.isPresent,
+          note: row.note.trim() ? row.note.trim() : null,
+          gradeValue: row.gradeValue.trim() === '' ? null : Number(clampGrade(row.gradeValue))
         }))
-      });
+      };
+
+      return sendFirst(
+        [
+          { method: 'post', url: '/api/teacher-grading/save' },
+          { method: 'post', url: '/api/teacher-grading/update' },
+          { method: 'put', url: '/api/teacher-grading' }
+        ],
+        payload
+      );
     },
-    onSuccess: async () => {
-      await rowsQuery.refetch();
-      setMessage('Сохранено. Данные отправлены на сервер и перечитаны заново.');
+    onSuccess: () => {
+      setMessage('Оценки и посещаемость успешно сохранены.');
+      rowsQuery.refetch();
     },
-    onError: (error: any) => {
-      const serverMessage =
-        error?.response?.data?.message ||
-        error?.response?.data?.error ||
-        'Не удалось сохранить оценки и посещаемость.';
-      setMessage(serverMessage);
+    onError: () => {
+      setMessage(
+        'Таблица загружена, но backend endpoint сохранения teacher grading не найден или не поддерживает этот формат.'
+      );
     }
   });
 
@@ -195,7 +313,7 @@ export function TeacherGradingPanel({ title, description }: Props) {
             {!lessonsQuery.data?.length && <option value="">Нет пар</option>}
             {(lessonsQuery.data ?? []).map((lesson) => (
               <option key={lesson.scheduleId} value={lesson.scheduleId}>
-                {lesson.courseName} — {formatDate(lesson.lessonDate)} — {lesson.timeSlot}
+                {lesson.courseName} — {formatDate(lesson.lessonDate)} — {lesson.timeSlot || 'время не указано'}
               </option>
             ))}
           </select>
@@ -269,11 +387,10 @@ export function TeacherGradingPanel({ title, description }: Props) {
           <thead>
             <tr className="bg-slate-100 text-slate-700">
               <th className="rounded-l-2xl px-4 py-3 text-left font-semibold">Студент</th>
-              <th className="px-4 py-3 text-left font-semibold">Студ. билет</th>
+              <th className="px-4 py-3 text-left font-semibold">Группа</th>
               <th className="px-4 py-3 text-left font-semibold">Присутствовал</th>
-              <th className="px-4 py-3 text-left font-semibold">Пропущено часов</th>
               <th className="px-4 py-3 text-left font-semibold">Оценка</th>
-              <th className="rounded-r-2xl px-4 py-3 text-left font-semibold">Комментарий</th>
+              <th className="rounded-r-2xl px-4 py-3 text-left font-semibold">Примечание</th>
             </tr>
           </thead>
           <tbody>
@@ -281,7 +398,7 @@ export function TeacherGradingPanel({ title, description }: Props) {
               rows.map((row, index) => (
                 <tr key={`${row.studentId}-${index}`} className="border-b border-slate-200">
                   <td className="px-4 py-3 text-slate-800">{row.fullName}</td>
-                  <td className="px-4 py-3 text-slate-700">{row.studentCard || '—'}</td>
+                  <td className="px-4 py-3 text-slate-700">{row.groupCode || '—'}</td>
                   <td className="px-4 py-3">
                     <input
                       type="checkbox"
@@ -298,7 +415,6 @@ export function TeacherGradingPanel({ title, description }: Props) {
                       className="h-4 w-4"
                     />
                   </td>
-                  <td className="px-4 py-3 text-slate-700">{row.missedHours}</td>
                   <td className="px-4 py-3">
                     <input
                       value={row.gradeValue}
@@ -326,12 +442,12 @@ export function TeacherGradingPanel({ title, description }: Props) {
                   </td>
                   <td className="px-4 py-3">
                     <input
-                      value={row.teacherComment}
+                      value={row.note}
                       onChange={(event) =>
                         setRows((prev) =>
                           prev.map((item, currentIndex) =>
                             currentIndex === index
-                              ? { ...item, teacherComment: event.target.value }
+                              ? { ...item, note: event.target.value }
                               : item
                           )
                         )
@@ -344,7 +460,7 @@ export function TeacherGradingPanel({ title, description }: Props) {
               ))
             ) : (
               <tr>
-                <td colSpan={6} className="px-4 py-6 text-center text-slate-500">
+                <td colSpan={5} className="px-4 py-6 text-center text-slate-500">
                   Нет данных для отображения. Сначала выберите группу и пару.
                 </td>
               </tr>
