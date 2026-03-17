@@ -2,6 +2,9 @@ package com.example.grade_journal_back.common.exception;
 
 import com.example.grade_journal_back.common.api.ApiError;
 import jakarta.validation.ConstraintViolationException;
+import java.time.Instant;
+import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -10,55 +13,60 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.time.Instant;
-import java.util.List;
-
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ApiError> handleNotFound(NotFoundException ex) {
+        log.warn("Resource not found: {}", ex.getMessage());
         return build(HttpStatus.NOT_FOUND, ex.getMessage(), List.of());
     }
 
     @ExceptionHandler({BadRequestException.class, ConstraintViolationException.class})
     public ResponseEntity<ApiError> handleBadRequest(Exception ex) {
+        log.warn("Bad request: {}", ex.getMessage());
         return build(HttpStatus.BAD_REQUEST, ex.getMessage(), List.of());
     }
 
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ApiError> handleUnauthorized(UnauthorizedException ex) {
+        log.warn("Unauthorized request: {}", ex.getMessage());
         return build(HttpStatus.UNAUTHORIZED, ex.getMessage(), List.of());
     }
 
     @ExceptionHandler({ForbiddenException.class, AccessDeniedException.class})
     public ResponseEntity<ApiError> handleForbidden(Exception ex) {
+        log.warn("Forbidden request: {}", ex.getMessage());
         return build(HttpStatus.FORBIDDEN, ex.getMessage(), List.of());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiError> handleValidation(MethodArgumentNotValidException ex) {
         List<String> details = ex.getBindingResult()
-            .getFieldErrors()
-            .stream()
-            .map(this::formatFieldError)
-            .toList();
+                .getFieldErrors()
+                .stream()
+                .map(this::formatFieldError)
+                .toList();
+
+        log.warn("Validation error: {}", details);
 
         return build(HttpStatus.BAD_REQUEST, "Ошибка валидации", details);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleUnknown(Exception ex) {
+        log.error("Unhandled exception occurred: {}", ex.getMessage(), ex);
         return build(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), List.of());
     }
 
     private ResponseEntity<ApiError> build(HttpStatus status, String message, List<String> details) {
         ApiError error = new ApiError(
-            Instant.now(),
-            status.value(),
-            status.getReasonPhrase(),
-            message,
-            details
+                Instant.now(),
+                status.value(),
+                status.getReasonPhrase(),
+                message,
+                details
         );
 
         return ResponseEntity.status(status).body(error);

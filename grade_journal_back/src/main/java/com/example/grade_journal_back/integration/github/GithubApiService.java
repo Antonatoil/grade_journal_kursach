@@ -1,5 +1,6 @@
 package com.example.grade_journal_back.integration.github;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -7,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 public class GithubApiService {
 
@@ -17,10 +19,14 @@ public class GithubApiService {
             .build();
 
     public GithubProfileDto fetchProfile(String username) {
+        log.info("Fetching GitHub profile for username='{}'", username);
+
         Map<String, Object> profile = restClient.get()
                 .uri("/users/{username}", username)
                 .retrieve()
                 .body(Map.class);
+
+        log.info("GitHub profile data fetched for username='{}'", username);
 
         List<Map<String, Object>> repos = restClient.get()
                 .uri(uriBuilder -> uriBuilder
@@ -35,7 +41,13 @@ public class GithubApiService {
                 ? Collections.emptyList()
                 : repos.stream().map(this::toRepoDto).toList();
 
-        return new GithubProfileDto(
+        log.info(
+                "GitHub repositories fetched for username='{}', count={}",
+                username,
+                repositoryDtos.size()
+        );
+
+        GithubProfileDto result = new GithubProfileDto(
                 asString(profile.get("login")),
                 asString(profile.get("name")),
                 asString(profile.get("avatar_url")),
@@ -46,6 +58,9 @@ public class GithubApiService {
                 asInteger(profile.get("following")),
                 repositoryDtos
         );
+
+        log.info("GitHub profile assembled successfully for username='{}'", username);
+        return result;
     }
 
     private GithubRepoDto toRepoDto(Map<String, Object> source) {

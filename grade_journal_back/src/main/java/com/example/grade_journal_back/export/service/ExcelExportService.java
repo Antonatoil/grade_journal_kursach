@@ -1,5 +1,6 @@
 package com.example.grade_journal_back.export.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -12,6 +13,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 public class ExcelExportService {
 
@@ -29,6 +31,16 @@ public class ExcelExportService {
             boolean performance,
             boolean attendance
     ) {
+        log.info(
+                "Starting Excel export: students={}, teachers={}, courses={}, schedule={}, performance={}, attendance={}",
+                students,
+                teachers,
+                courses,
+                schedule,
+                performance,
+                attendance
+        );
+
         try (Workbook workbook = new XSSFWorkbook();
              ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
 
@@ -147,6 +159,8 @@ public class ExcelExportService {
             }
 
             if (workbook.getNumberOfSheets() == 0) {
+                log.info("No export sections selected, creating fallback sheet");
+
                 Sheet sheet = workbook.createSheet("Отчет");
                 Row header = sheet.createRow(0);
                 header.createCell(0).setCellValue("Выберите хотя бы один раздел для экспорта.");
@@ -154,17 +168,25 @@ public class ExcelExportService {
             }
 
             workbook.write(outputStream);
+
+            log.info("Excel export completed successfully, sheets={}", workbook.getNumberOfSheets());
+
             return outputStream.toByteArray();
         } catch (IOException exception) {
+            log.error("Excel export failed: {}", exception.getMessage(), exception);
             throw new RuntimeException("Не удалось сформировать Excel-отчет.", exception);
         }
     }
 
     private void createSheet(Workbook workbook, String sheetName, String sql) {
+        log.info("Creating Excel sheet '{}'", sheetName);
+
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql);
         Sheet sheet = workbook.createSheet(sheetName);
 
         if (rows.isEmpty()) {
+            log.info("No data found for Excel sheet '{}'", sheetName);
+
             Row emptyRow = sheet.createRow(0);
             emptyRow.createCell(0).setCellValue("Нет данных");
             sheet.autoSizeColumn(0);
@@ -191,5 +213,12 @@ public class ExcelExportService {
         for (int columnIndex = 0; columnIndex < headers.size(); columnIndex++) {
             sheet.autoSizeColumn(columnIndex);
         }
+
+        log.info(
+                "Excel sheet '{}' created successfully with rows={} and columns={}",
+                sheetName,
+                rows.size(),
+                headers.size()
+        );
     }
 }

@@ -1,5 +1,6 @@
 package com.example.grade_journal_back.integration.oauth;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 
+@Slf4j
 @Service
 public class SocialLoginService {
 
@@ -25,19 +27,34 @@ public class SocialLoginService {
         String normalizedEmail = email == null ? null : email.trim().toLowerCase(Locale.ROOT);
         String safeRole = "teacher".equalsIgnoreCase(requestedRole) ? "teacher" : "student";
 
+        log.info(
+                "Processing GitHub login: providerUserId='{}', normalizedEmail='{}', requestedRole='{}', appliedRole='{}'",
+                providerUserId,
+                normalizedEmail,
+                requestedRole,
+                safeRole
+        );
+
         Optional<UserRow> linkedUser = findByOAuth("github", providerUserId);
         if (linkedUser.isPresent()) {
+            log.info("Existing OAuth link found for providerUserId='{}'", providerUserId);
             return buildResultFromUser(linkedUser.get(), normalizedEmail, fullName);
         }
 
         Optional<UserRow> emailUser = findByEmail(normalizedEmail);
         if (emailUser.isPresent()) {
             UserRow user = emailUser.get();
+            log.info(
+                    "Existing user found by email for providerUserId='{}', linking OAuth to userId={}",
+                    providerUserId,
+                    user.userAccountId()
+            );
             linkOAuth(user.userAccountId(), providerUserId, normalizedEmail);
             return buildResultFromUser(user, normalizedEmail, fullName);
         }
 
         if (hasPendingRequest(normalizedEmail)) {
+            log.info("Pending registration request already exists for email='{}'", normalizedEmail);
             return new SocialLoginResult(
                     "pending",
                     null,
@@ -65,6 +82,13 @@ public class SocialLoginService {
                 normalizedEmail
         );
 
+        log.info(
+                "New pending registration request created from GitHub login for username='{}', email='{}', role='{}'",
+                username,
+                normalizedEmail,
+                safeRole
+        );
+
         return new SocialLoginResult(
                 "pending",
                 null,
@@ -77,7 +101,15 @@ public class SocialLoginService {
     }
 
     private SocialLoginResult buildResultFromUser(UserRow user, String email, String fullName) {
+        log.info(
+                "Building social login result for userId={}, username='{}', role='{}'",
+                user.userAccountId(),
+                user.username(),
+                user.roleCode()
+        );
+
         if (!user.isApproved()) {
+            log.info("Social login result status is pending for userId={}", user.userAccountId());
             return new SocialLoginResult(
                     "pending",
                     user.userAccountId(),
@@ -90,6 +122,7 @@ public class SocialLoginService {
         }
 
         if (!user.isActive()) {
+            log.info("Social login result status is inactive for userId={}", user.userAccountId());
             return new SocialLoginResult(
                     "inactive",
                     user.userAccountId(),
@@ -101,6 +134,7 @@ public class SocialLoginService {
             );
         }
 
+        log.info("Social login approved for userId={}", user.userAccountId());
         return new SocialLoginResult(
                 "approved",
                 user.userAccountId(),
@@ -113,6 +147,8 @@ public class SocialLoginService {
     }
 
     private Optional<UserRow> findByOAuth(String provider, String providerUserId) {
+        log.debug("Looking up OAuth link for provider='{}', providerUserId='{}'", provider, providerUserId);
+
         List<UserRow> rows = jdbcTemplate.query(
                 """
                 select ua.user_account_id,
@@ -137,13 +173,17 @@ public class SocialLoginService {
                 providerUserId
         );
 
+        log.debug("OAuth lookup completed for providerUserId='{}', found={}", providerUserId, !rows.isEmpty());
         return rows.stream().findFirst();
     }
 
     private Optional<UserRow> findByEmail(String email) {
         if (email == null || email.isBlank()) {
+            log.debug("Skipping email lookup because email is empty");
             return Optional.empty();
         }
+
+        log.debug("Looking up user by email='{}'", email);
 
         List<UserRow> rows = jdbcTemplate.query(
                 """
@@ -166,10 +206,17 @@ public class SocialLoginService {
                 email
         );
 
+        log.debug("Email lookup completed for email='{}', found={}", email, !rows.isEmpty());
         return rows.stream().findFirst();
     }
 
     private void linkOAuth(Integer userAccountId, String providerUserId, String email) {
+        log.info(
+                "Linking GitHub OAuth to userId={}, providerUserId='{}'",
+                userAccountId,
+                providerUserId
+        );
+
         Integer count = jdbcTemplate.queryForObject(
                 """
                 select count(*)
@@ -182,6 +229,7 @@ public class SocialLoginService {
         );
 
         if (count != null && count > 0) {
+            log.info("OAuth link already exists for providerUserId='{}'", providerUserId);
             return;
         }
 
@@ -195,6 +243,8 @@ public class SocialLoginService {
                 providerUserId,
                 email
         );
+
+        log.info("OAuth link created successfully for userId={}", userAccountId);
     }
 
     private boolean hasPendingRequest(String email) {
@@ -213,7 +263,9 @@ public class SocialLoginService {
                 email
         );
 
-        return count != null && count > 0;
+        boolean hasPending = count != null && count > 0;
+        log.debug("Pending request lookup for email='{}', found={}", email, hasPending);
+        return hasPending;
     }
 
     private String generateUniqueUsername(String email, String fullName) {
@@ -235,6 +287,7 @@ public class SocialLoginService {
             candidate = base + "_" + (1000 + random.nextInt(9000));
         }
 
+        log.info("Generated unique username='{}' for social login", candidate);
         return candidate;
     }
 
@@ -251,7 +304,9 @@ public class SocialLoginService {
                 username
         );
 
-        return (userCount != null && userCount > 0) || (requestCount != null && requestCount > 0);
+        boolean exists = (userCount != null && userCount > 0) || (requestCount != null && requestCount > 0);
+        log.debug("Username existence check for username='{}', exists={}", username, exists);
+        return exists;
     }
 
     private String slugify(String value) {

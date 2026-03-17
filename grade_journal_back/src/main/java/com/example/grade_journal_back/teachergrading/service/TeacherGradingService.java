@@ -5,6 +5,7 @@ import com.example.grade_journal_back.teachergrading.dto.TeacherGroupOptionDto;
 import com.example.grade_journal_back.teachergrading.dto.TeacherLessonOptionDto;
 import com.example.grade_journal_back.teachergrading.dto.TeacherLessonStudentDto;
 import com.example.grade_journal_back.teachergrading.dto.TeacherLessonStudentUpdateDto;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 
+@Slf4j
 @Service
 public class TeacherGradingService {
 
@@ -26,6 +28,8 @@ public class TeacherGradingService {
     public List<TeacherGroupOptionDto> getMyGroups() {
         Integer teacherId = resolveCurrentTeacherId();
 
+        log.info("Loading groups for teacherId={}", teacherId);
+
         String sql = """
                 select distinct
                     sg.group_id,
@@ -37,15 +41,20 @@ public class TeacherGradingService {
                 order by sg.course_no, sg.group_code
                 """;
 
-        return jdbcTemplate.query(sql, (rs, rowNum) -> new TeacherGroupOptionDto(
+        List<TeacherGroupOptionDto> result = jdbcTemplate.query(sql, (rs, rowNum) -> new TeacherGroupOptionDto(
                 rs.getInt("group_id"),
                 rs.getString("group_code"),
                 rs.getInt("course_no")
         ), teacherId);
+
+        log.info("Groups loaded for teacherId={}: count={}", teacherId, result.size());
+        return result;
     }
 
     public List<TeacherLessonOptionDto> getMyLessons(Integer groupId) {
         Integer teacherId = resolveCurrentTeacherId();
+
+        log.info("Loading lessons for teacherId={}, groupId={}", teacherId, groupId);
 
         String sql = """
                 select
@@ -64,7 +73,7 @@ public class TeacherGradingService {
                 order by se.lesson_date, se.time_slot
                 """;
 
-        return jdbcTemplate.query(sql, (rs, rowNum) -> new TeacherLessonOptionDto(
+        List<TeacherLessonOptionDto> result = jdbcTemplate.query(sql, (rs, rowNum) -> new TeacherLessonOptionDto(
                 rs.getInt("schedule_id"),
                 rs.getDate("lesson_date").toLocalDate(),
                 rs.getString("time_slot"),
@@ -72,10 +81,21 @@ public class TeacherGradingService {
                 rs.getString("group_code"),
                 rs.getString("topic")
         ), teacherId, groupId);
+
+        log.info(
+                "Lessons loaded for teacherId={}, groupId={}: count={}",
+                teacherId,
+                groupId,
+                result.size()
+        );
+        return result;
     }
 
     public List<TeacherLessonStudentDto> getLessonStudents(Integer scheduleId) {
         Integer teacherId = resolveCurrentTeacherId();
+
+        log.info("Loading lesson students for teacherId={}, scheduleId={}", teacherId, scheduleId);
+
         validateTeacherOwnsSchedule(teacherId, scheduleId);
 
         Integer assessmentItemId = findAssessmentItemIdBySchedule(scheduleId);
@@ -106,7 +126,7 @@ public class TeacherGradingService {
                 order by ua.full_name
                 """;
 
-        return jdbcTemplate.query(sql, (rs, rowNum) -> new TeacherLessonStudentDto(
+        List<TeacherLessonStudentDto> result = jdbcTemplate.query(sql, (rs, rowNum) -> new TeacherLessonStudentDto(
                 rs.getInt("student_id"),
                 rs.getInt("enrollment_id"),
                 rs.getString("full_name"),
@@ -116,18 +136,43 @@ public class TeacherGradingService {
                 rs.getBigDecimal("grade_value"),
                 rs.getString("teacher_comment")
         ), assessmentItemId, assessmentItemId, scheduleId, teacherId);
+
+        log.info(
+                "Lesson students loaded for teacherId={}, scheduleId={}: count={}, assessmentItemId={}",
+                teacherId,
+                scheduleId,
+                result.size(),
+                assessmentItemId
+        );
+        return result;
     }
 
     @Transactional
     public void saveLesson(Integer scheduleId, SaveTeacherLessonRequest request) {
         Integer teacherId = resolveCurrentTeacherId();
+
+        log.info("Saving lesson data for teacherId={}, scheduleId={}", teacherId, scheduleId);
+
         validateTeacherOwnsSchedule(teacherId, scheduleId);
 
         Integer assessmentItemId = ensureAssessmentItem(scheduleId);
 
         if (request == null || request.students() == null) {
+            log.info(
+                    "Save lesson request is empty for teacherId={}, scheduleId={}, nothing to persist",
+                    teacherId,
+                    scheduleId
+            );
             return;
         }
+
+        log.info(
+                "Processing lesson save for teacherId={}, scheduleId={}, studentsCount={}, assessmentItemId={}",
+                teacherId,
+                scheduleId,
+                request.students().size(),
+                assessmentItemId
+        );
 
         for (TeacherLessonStudentUpdateDto row : request.students()) {
             jdbcTemplate.update("""
@@ -169,6 +214,13 @@ public class TeacherGradingService {
                 );
             }
         }
+
+        log.info(
+                "Lesson data saved successfully for teacherId={}, scheduleId={}, studentsCount={}",
+                teacherId,
+                scheduleId,
+                request.students().size()
+        );
     }
 
     private BigDecimal normalizeGrade(BigDecimal value) {
@@ -188,8 +240,11 @@ public class TeacherGradingService {
 
         return rounded;
     }
+
     private Integer resolveCurrentTeacherId() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        log.debug("Resolving teacherId for username='{}'", username);
 
         Integer teacherId = jdbcTemplate.query("""
                 select t.teacher_id
@@ -199,9 +254,11 @@ public class TeacherGradingService {
                 """, rs -> rs.next() ? rs.getInt("teacher_id") : null, username);
 
         if (teacherId == null) {
+            log.warn("Teacher resolution failed for username='{}'", username);
             throw new IllegalStateException("Текущий пользователь не является преподавателем.");
         }
 
+        log.debug("Resolved teacherId={} for username='{}'", teacherId, username);
         return teacherId;
     }
 
@@ -215,25 +272,38 @@ public class TeacherGradingService {
                 """, rs -> rs.next() ? rs.getInt(1) : 0, scheduleId, teacherId);
 
         if (count == null || count == 0) {
+            log.warn(
+                    "Teacher access denied to schedule: teacherId={}, scheduleId={}",
+                    teacherId,
+                    scheduleId
+            );
             throw new IllegalStateException("У преподавателя нет доступа к выбранной паре.");
         }
+
+        log.debug("Teacher access validated for teacherId={}, scheduleId={}", teacherId, scheduleId);
     }
 
     private Integer findAssessmentItemIdBySchedule(Integer scheduleId) {
-        return jdbcTemplate.query("""
+        Integer assessmentItemId = jdbcTemplate.query("""
                 select ai.assessment_item_id
                 from assessment_item ai
                 where ai.schedule_id = ?
                 order by ai.assessment_item_id
                 limit 1
                 """, rs -> rs.next() ? rs.getInt("assessment_item_id") : null, scheduleId);
+
+        log.debug("Assessment item lookup for scheduleId={} returned assessmentItemId={}", scheduleId, assessmentItemId);
+        return assessmentItemId;
     }
 
     private Integer ensureAssessmentItem(Integer scheduleId) {
         Integer existing = findAssessmentItemIdBySchedule(scheduleId);
         if (existing != null) {
+            log.debug("Existing assessment item found for scheduleId={}: assessmentItemId={}", scheduleId, existing);
             return existing;
         }
+
+        log.info("No assessment item found for scheduleId={}, creating new one", scheduleId);
 
         Integer offeringId = jdbcTemplate.query("""
                 select offering_id
@@ -242,6 +312,7 @@ public class TeacherGradingService {
                 """, rs -> rs.next() ? rs.getInt("offering_id") : null, scheduleId);
 
         if (offeringId == null) {
+            log.warn("Assessment item creation failed: offering not found for scheduleId={}", scheduleId);
             throw new IllegalStateException("Не найдена учебная пара.");
         }
 
@@ -253,6 +324,7 @@ public class TeacherGradingService {
                 """, rs -> rs.next() ? rs.getInt("assessment_type_id") : null);
 
         if (assessmentTypeId == null) {
+            log.warn("Assessment item creation failed: assessment type 'quiz' not found");
             throw new IllegalStateException("Не найден тип оценивания quiz.");
         }
 
@@ -282,8 +354,16 @@ public class TeacherGradingService {
                 """, rs -> rs.next() ? rs.getInt("assessment_item_id") : null, assessmentTypeId, scheduleId);
 
         if (generatedId == null) {
+            log.warn("Assessment item creation failed for scheduleId={}", scheduleId);
             throw new IllegalStateException("Не удалось создать контрольную точку для занятия.");
         }
+
+        log.info(
+                "Assessment item created successfully for scheduleId={}, assessmentItemId={}, offeringId={}",
+                scheduleId,
+                generatedId,
+                offeringId
+        );
 
         return generatedId;
     }

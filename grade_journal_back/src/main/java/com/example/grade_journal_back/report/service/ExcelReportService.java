@@ -1,6 +1,7 @@
 package com.example.grade_journal_back.report.service;
 
 import com.example.grade_journal_back.report.dto.ExportReportRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
@@ -23,6 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 public class ExcelReportService {
 
@@ -36,10 +38,21 @@ public class ExcelReportService {
     }
 
     public byte[] generateWorkbook(ExportReportRequest request) {
+        log.info(
+                "Starting report workbook generation: students={}, teachers={}, courses={}, schedule={}, performance={}, attendance={}",
+                request.students(),
+                request.teachers(),
+                request.courses(),
+                request.schedule(),
+                request.performance(),
+                request.attendance()
+        );
+
         try (XSSFWorkbook workbook = new XSSFWorkbook(); ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             CellStyle headerStyle = createHeaderStyle(workbook);
 
             if (request.students()) {
+                log.info("Preparing 'Студенты' report section");
                 writeSheet(workbook, headerStyle, "Студенты", jdbcTemplate.queryForList(
                         """
                         select ua.full_name as "ФИО",
@@ -59,6 +72,7 @@ public class ExcelReportService {
             }
 
             if (request.teachers()) {
+                log.info("Preparing 'Преподаватели' report section");
                 writeSheet(workbook, headerStyle, "Преподаватели", jdbcTemplate.queryForList(
                         """
                         select ua.full_name as "ФИО",
@@ -78,6 +92,7 @@ public class ExcelReportService {
             }
 
             if (request.courses()) {
+                log.info("Preparing 'Курсы' report section");
                 writeSheet(workbook, headerStyle, "Курсы", jdbcTemplate.queryForList(
                         """
                         select course_code as "Код",
@@ -93,6 +108,7 @@ public class ExcelReportService {
             }
 
             if (request.schedule()) {
+                log.info("Preparing 'Расписание' report section");
                 writeSheet(workbook, headerStyle, "Расписание", jdbcTemplate.queryForList(
                         """
                         select sg.group_code as "Группа",
@@ -115,6 +131,7 @@ public class ExcelReportService {
             }
 
             if (request.performance()) {
+                log.info("Preparing 'Успеваемость' report section");
                 writeSheet(workbook, headerStyle, "Успеваемость", jdbcTemplate.queryForList(
                         """
                         select stu.full_name as "Студент",
@@ -148,6 +165,7 @@ public class ExcelReportService {
             }
 
             if (request.attendance()) {
+                log.info("Preparing 'Посещаемость' report section");
                 writeSheet(workbook, headerStyle, "Посещаемость", jdbcTemplate.queryForList(
                         """
                         select stu.full_name as "Студент",
@@ -177,17 +195,23 @@ public class ExcelReportService {
             }
 
             if (workbook.getNumberOfSheets() == 0) {
+                log.info("No report sections selected, generating fallback sheet");
                 writeSheet(workbook, headerStyle, "Пустой отчет", List.of(Map.of("Сообщение", "Не выбраны разделы для экспорта")));
             }
 
             workbook.write(outputStream);
+
+            log.info("Report workbook generated successfully with sheets={}", workbook.getNumberOfSheets());
             return outputStream.toByteArray();
         } catch (IOException exception) {
+            log.error("Failed to generate report workbook: {}", exception.getMessage(), exception);
             throw new IllegalStateException("Не удалось сформировать Excel-отчет", exception);
         }
     }
 
     private void writeSheet(XSSFWorkbook workbook, CellStyle headerStyle, String sheetName, List<Map<String, Object>> rows) {
+        log.info("Writing report sheet '{}'", sheetName);
+
         XSSFSheet sheet = workbook.createSheet(sheetName);
         List<Map<String, Object>> preparedRows = rows.isEmpty() ? List.of(Map.of("Нет данных", "В выбранном разделе пока нет данных")) : normalizeRows(rows);
 
@@ -214,6 +238,13 @@ public class ExcelReportService {
             int width = Math.min(sheet.getColumnWidth(columnIndex) + 1024, 16000);
             sheet.setColumnWidth(columnIndex, width);
         }
+
+        log.info(
+                "Report sheet '{}' written successfully with rows={} and columns={}",
+                sheetName,
+                preparedRows.size(),
+                headers.size()
+        );
     }
 
     private List<Map<String, Object>> normalizeRows(List<Map<String, Object>> rows) {
@@ -227,6 +258,8 @@ public class ExcelReportService {
     }
 
     private CellStyle createHeaderStyle(XSSFWorkbook workbook) {
+        log.debug("Creating Excel header style");
+
         CellStyle style = workbook.createCellStyle();
         Font font = workbook.createFont();
         font.setBold(true);

@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -18,6 +19,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -42,6 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = authHeader.substring(7).trim();
 
         if (token.isBlank()) {
+            log.warn("JWT authentication skipped: blank bearer token for path='{}'", request.getRequestURI());
             filterChain.doFilter(request, response);
             return;
         }
@@ -71,9 +74,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     );
 
                     SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                    log.debug(
+                            "JWT authentication successful for username='{}', path='{}'",
+                            user.getUsername(),
+                            request.getRequestURI()
+                    );
+                } else {
+                    log.warn(
+                            "JWT authentication failed: user not found or token invalid for username='{}', path='{}'",
+                            username,
+                            request.getRequestURI()
+                    );
                 }
             }
-        } catch (Exception ignored) {
+        } catch (Exception ex) {
+            log.warn(
+                    "JWT authentication error for path='{}': {}",
+                    request.getRequestURI(),
+                    ex.getMessage()
+            );
             SecurityContextHolder.clearContext();
         }
 

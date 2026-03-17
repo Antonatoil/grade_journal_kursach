@@ -5,12 +5,13 @@ import com.example.grade_journal_back.analytics.dto.RiskGroupStudentDto;
 import com.example.grade_journal_back.analytics.dto.StudentComparisonDto;
 import com.example.grade_journal_back.analytics.dto.TeacherLessonDto;
 import com.example.grade_journal_back.analytics.dto.TeacherOptionDto;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.List;
 
+@Slf4j
 @Service
 public class AnalyticsService {
 
@@ -21,6 +22,8 @@ public class AnalyticsService {
     }
 
     public List<TeacherOptionDto> getTeacherOptions() {
+        log.info("Loading teacher options for analytics");
+
         String sql = """
                 select
                     t.teacher_id,
@@ -33,15 +36,20 @@ public class AnalyticsService {
                 order by ua.full_name
                 """;
 
-        return jdbcTemplate.query(sql, (rs, rowNum) -> new TeacherOptionDto(
+        List<TeacherOptionDto> result = jdbcTemplate.query(sql, (rs, rowNum) -> new TeacherOptionDto(
                 rs.getInt("teacher_id"),
                 rs.getString("full_name"),
                 rs.getString("department_name"),
                 rs.getString("position")
         ));
+
+        log.info("Teacher options loaded successfully: count={}", result.size());
+        return result;
     }
 
     public List<TeacherLessonDto> getTeacherSchedule(Integer teacherId) {
+        log.info("Loading teacher schedule for teacherId={}", teacherId);
+
         String sql = """
                 select
                     se.lesson_date,
@@ -59,7 +67,7 @@ public class AnalyticsService {
                 order by se.lesson_date, se.time_slot, sg.group_code
                 """;
 
-        return jdbcTemplate.query(sql, (rs, rowNum) -> new TeacherLessonDto(
+        List<TeacherLessonDto> result = jdbcTemplate.query(sql, (rs, rowNum) -> new TeacherLessonDto(
                 rs.getDate("lesson_date").toLocalDate(),
                 rs.getString("time_slot"),
                 rs.getString("course_name"),
@@ -68,9 +76,14 @@ public class AnalyticsService {
                 rs.getString("lesson_type"),
                 rs.getString("topic")
         ), teacherId);
+
+        log.info("Teacher schedule loaded successfully for teacherId={}, count={}", teacherId, result.size());
+        return result;
     }
 
     public List<GroupComparisonDto> getGroupComparison() {
+        log.info("Loading group comparison analytics");
+
         String sql = """
                 select
                     sg.group_id,
@@ -86,17 +99,26 @@ public class AnalyticsService {
                 order by average_grade desc, sg.group_code
                 """;
 
-        return jdbcTemplate.query(sql, (rs, rowNum) -> new GroupComparisonDto(
+        List<GroupComparisonDto> result = jdbcTemplate.query(sql, (rs, rowNum) -> new GroupComparisonDto(
                 rs.getInt("group_id"),
                 rs.getString("group_code"),
                 rs.getInt("course_no"),
                 rs.getInt("student_count"),
                 rs.getBigDecimal("average_grade")
         ));
+
+        log.info("Group comparison analytics loaded successfully: count={}", result.size());
+        return result;
     }
 
     public List<StudentComparisonDto> getStudentComparison(String sortDirection) {
         String direction = "asc".equalsIgnoreCase(sortDirection) ? "asc" : "desc";
+
+        log.info(
+                "Loading student comparison analytics with requestedSortDirection='{}', appliedSortDirection='{}'",
+                sortDirection,
+                direction
+        );
 
         String sql = """
                 select
@@ -116,16 +138,25 @@ public class AnalyticsService {
                 , ua.full_name
                 """;
 
-        return jdbcTemplate.query(sql, (rs, rowNum) -> new StudentComparisonDto(
+        List<StudentComparisonDto> result = jdbcTemplate.query(sql, (rs, rowNum) -> new StudentComparisonDto(
                 rs.getInt("student_id"),
                 rs.getString("full_name"),
                 rs.getString("group_code"),
                 rs.getString("student_card"),
                 rs.getBigDecimal("average_grade")
         ));
+
+        log.info(
+                "Student comparison analytics loaded successfully with sortDirection='{}', count={}",
+                direction,
+                result.size()
+        );
+        return result;
     }
 
     public List<RiskGroupStudentDto> getRiskGroups() {
+        log.info("Loading risk group analytics");
+
         String sql = """
                 with student_avg as (
                     select
@@ -163,7 +194,7 @@ public class AnalyticsService {
                     full_name
                 """;
 
-        return jdbcTemplate.query(sql, (rs, rowNum) -> new RiskGroupStudentDto(
+        List<RiskGroupStudentDto> result = jdbcTemplate.query(sql, (rs, rowNum) -> new RiskGroupStudentDto(
                 rs.getString("risk_band"),
                 rs.getInt("student_id"),
                 rs.getString("full_name"),
@@ -171,5 +202,8 @@ public class AnalyticsService {
                 rs.getString("student_card"),
                 rs.getBigDecimal("average_grade")
         ));
+
+        log.info("Risk group analytics loaded successfully: count={}", result.size());
+        return result;
     }
 }
