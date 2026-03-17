@@ -1,0 +1,71 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: grade_journal_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: grade_journal_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 346655
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d grade_journal_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: grade_journal_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./grade_journal_back
+    container_name: grade_journal_back
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/grade_journal_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 346655
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      APP_OAUTH2_FRONTEND_BASE_URL: http://localhost:5173
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-Iv23li2yzcNdnIyZsQ2x}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-c431b2ef6754e39773a96cf2f3ebd623ea7c161d}
+      APP_JWT_SECRET: ${APP_JWT_SECRET:-grade-journal-super-secret-key-2026-very-long-and-safe-123456789}
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: ./grade_journal_front
+      args:
+        VITE_API_BASE_URL: http://localhost:8080
+    container_name: grade_journal_front
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
+volumes:
+  postgres_data:
+  redis_data:
