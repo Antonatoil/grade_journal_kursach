@@ -1,0 +1,293 @@
+:root {
+  color-scheme: light;
+  --app-bg:
+    radial-gradient(circle at 0% 0%, rgba(122, 162, 255, 0.24), transparent 32%),
+    radial-gradient(circle at 100% 0%, rgba(97, 211, 255, 0.18), transparent 28%),
+    radial-gradient(circle at 50% 100%, rgba(173, 138, 255, 0.16), transparent 32%),
+    linear-gradient(135deg, #f5f9ff 0%, #edf4ff 42%, #f9fbff 100%);
+  --panel-bg: rgba(255, 255, 255, 0.78);
+  --panel-bg-strong: rgba(255, 255, 255, 0.92);
+  --panel-border: rgba(130, 168, 255, 0.26);
+  --panel-shadow:
+    0 12px 40px rgba(63, 96, 160, 0.10),
+    0 2px 10px rgba(63, 96, 160, 0.06),
+    inset 0 1px 0 rgba(255,255,255,0.85);
+  --text-main: #20324d;
+  --text-soft: #425879;
+  --text-muted: #6d7f99;
+  --accent: #5b7cff;
+  --accent-2: #51c8ff;
+  --accent-3: #8a7dff;
+  --success: #24b47e;
+}
+
+html, body, #root {
+  min-height: 100%;
+  background: var(--app-bg) !important;
+}
+
+body {
+  margin: 0;
+  color: var(--text-main);
+  font-family: Inter, Segoe UI, Arial, sans-serif;
+  background-attachment: fixed !important;
+  overflow-x: hidden;
+  position: relative;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(131, 164, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(131, 164, 255, 0.08) 1px, transparent 1px);
+  background-size: 36px 36px;
+  mask-image: radial-gradient(circle at center, black 38%, transparent 82%);
+  opacity: 0.35;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  width: 420px;
+  height: 420px;
+  right: -120px;
+  top: -120px;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(81, 200, 255, 0.20), transparent 68%);
+  filter: blur(18px);
+}
+
+#root {
+  position: relative;
+  isolation: isolate;
+}
+
+/* Убираем мрачные/тёмные фоны приложения */
+[class~="bg-slate-950"],
+[class~="bg-slate-900"],
+[class~="bg-slate-800"],
+[class~="bg-slate-700"],
+[class~="from-slate-950"],
+[class~="from-slate-900"],
+[class~="to-slate-950"],
+[class~="to-slate-900"],
+[class~="to-slate-800"],
+[class*="bg-gradient-to-"] {
+  background-image: none !important;
+  background-color: transparent !important;
+}
+
+/* Базовый светлый вид */
+.bg-white,
+.bg-slate-50,
+.bg-slate-100,
+[class~="bg-white"],
+[class~="bg-slate-50"],
+[class~="bg-slate-100"] {
+  background: var(--panel-bg) !important;
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+}
+
+/* Панели, карточки, блоки */
+section,
+article,
+aside,
+form,
+table,
+header,
+nav,
+main > div,
+div.rounded-3xl,
+div.rounded-2xl,
+div.rounded-xl {
+  position: relative;
+}
+
+.rounded-3xl,
+.rounded-2xl,
+.rounded-xl,
+.rounded-lg,
+[class*="rounded-3xl"],
+[class*="rounded-2xl"],
+[class*="rounded-xl"] {
+  border-color: var(--panel-border) !important;
+  box-shadow: var(--panel-shadow) !important;
+}
+
+.border,
+.border-slate-200,
+.border-slate-300 {
+  border-color: var(--panel-border) !important;
+}
+
+.rounded-3xl::before,
+.rounded-2xl::before,
+.rounded-xl::before,
+section::before,
+article::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(91, 124, 255, 0.26),
+    rgba(81, 200, 255, 0.12),
+    rgba(138, 125, 255, 0.18)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Текст */
+.text-slate-900,
+.text-slate-800,
+.text-slate-700 {
+  color: var(--text-main) !important;
+}
+
+.text-slate-600,
+.text-slate-500 {
+  color: var(--text-muted) !important;
+}
+
+body :not(button):not(a):not(input):not(select):not(textarea)[class~="text-white"] {
+  color: var(--text-main) !important;
+}
+
+/* Ссылки */
+a {
+  color: #4777ff !important;
+}
+
+a:hover {
+  color: #315fe6 !important;
+}
+
+/* Инпуты */
+input,
+select,
+textarea {
+  background: rgba(255,255,255,0.86) !important;
+  color: var(--text-main) !important;
+  border: 1px solid rgba(132, 166, 255, 0.28) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.85),
+    0 4px 14px rgba(66, 97, 161, 0.06) !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #8294ae !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none !important;
+  border-color: rgba(91, 124, 255, 0.62) !important;
+  box-shadow:
+    0 0 0 4px rgba(91, 124, 255, 0.10),
+    0 10px 24px rgba(81, 200, 255, 0.10) !important;
+}
+
+/* Кнопки */
+button,
+[class*="cursor-pointer"] {
+  transition: 0.22s ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+}
+
+.bg-blue-500,
+[class~="bg-blue-500"] {
+  background: linear-gradient(135deg, #6b7cff 0%, #4cc8ff 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow:
+    0 12px 24px rgba(81, 200, 255, 0.16),
+    0 6px 14px rgba(91, 124, 255, 0.14) !important;
+}
+
+.bg-emerald-500,
+[class~="bg-emerald-500"] {
+  background: linear-gradient(135deg, #22c78f 0%, #56d8ff 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow:
+    0 12px 24px rgba(86, 216, 255, 0.14),
+    0 6px 14px rgba(34, 199, 143, 0.14) !important;
+}
+
+.hover\:bg-blue-400:hover,
+.hover\:bg-emerald-400:hover {
+  filter: brightness(1.05);
+}
+
+.disabled\:opacity-60:disabled,
+.disabled\:opacity-70:disabled {
+  opacity: 0.65 !important;
+}
+
+/* Таблицы */
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+}
+
+thead,
+thead.bg-slate-50 {
+  background: rgba(240, 246, 255, 0.92) !important;
+}
+
+thead th {
+  color: #4c6180 !important;
+  font-weight: 600 !important;
+  border-bottom: 1px solid rgba(131, 164, 255, 0.20);
+}
+
+tbody tr {
+  background: rgba(255,255,255,0.55);
+  transition: background 0.18s ease;
+}
+
+tbody tr:hover {
+  background: rgba(230, 240, 255, 0.82) !important;
+}
+
+.border-t {
+  border-top-color: rgba(131, 164, 255, 0.14) !important;
+}
+
+/* Скроллбар */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(217, 229, 248, 0.8);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(91,124,255,0.65), rgba(81,200,255,0.65));
+  border-radius: 999px;
+}
+
+/* Если где-то огромный белый контейнер поверх фона */
+.min-h-screen,
+[class~="min-h-screen"] {
+  background: transparent !important;
+}

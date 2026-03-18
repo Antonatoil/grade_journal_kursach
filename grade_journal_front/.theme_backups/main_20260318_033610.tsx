@@ -7,8 +7,7 @@ import App from './App';
 import './index.css';
 import './styles/futuristic-theme.css';
 import { queryClient } from './lib/queryClient';
-
-import './styles/futuristic-light-theme.css';
+
 document.body.classList.add('light-theme');
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
